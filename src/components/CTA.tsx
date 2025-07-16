@@ -32,7 +32,7 @@ const CTA = () => {
           </div>
 
           <div className="animate-fade-in delay-400 flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Button variant="hero" size="lg" className="group">
+            <Button variant="gradient" size="lg" className="group">
               Start Free Trial
               <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
