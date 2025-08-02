@@ -95,8 +95,9 @@ export default {
 				'bounce': 'var(--transition-bounce)',
 			},
 			fontFamily: {
-				'inter': ['Inter', 'sans-serif'],
-				'poppins': ['Poppins', 'sans-serif'],
+				'sans': ['Geist', 'system-ui', 'sans-serif'],
+				'mono': ['Geist Mono', 'monospace'],
+				'geist': ['Geist', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

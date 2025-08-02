@@ -159,7 +159,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-subtle font-inter">
+    <div className="min-h-screen bg-gradient-subtle font-geist">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -168,7 +168,7 @@ const Dashboard = () => {
               <div className="w-8 h-8 bg-gradient-primary rounded-xl flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">S</span>
               </div>
-              <span className="text-xl font-poppins font-bold text-foreground">StartupSaathi</span>
+              <span className="text-xl font-geist font-bold text-foreground">StartupSaathi</span>
             </Link>
           </div>
           
@@ -194,7 +194,7 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-poppins font-bold text-foreground mb-2">
+          <h1 className="text-3xl font-geist font-bold text-foreground mb-2">
             Welcome back, {user.name}!
           </h1>
           <p className="text-muted-foreground">
@@ -239,7 +239,7 @@ const Dashboard = () => {
             {/* Continue Learning */}
             <Card className="border-border/50 bg-background">
               <CardHeader>
-                <CardTitle className="font-poppins">Continue Learning</CardTitle>
+                <CardTitle className="font-geist">Continue Learning</CardTitle>
                 <CardDescription>
                   Pick up where you left off
                 </CardDescription>
@@ -250,7 +250,7 @@ const Dashboard = () => {
                     <div key={course.id} className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-poppins font-semibold text-foreground">
+                          <h4 className="font-geist font-semibold text-foreground">
                             {course.title}
                           </h4>
                           <Badge variant="outline" className="text-xs">
@@ -277,7 +277,7 @@ const Dashboard = () => {
             {/* Recommendations */}
             <Card className="border-border/50 bg-background">
               <CardHeader>
-                <CardTitle className="font-poppins">Recommended for You</CardTitle>
+                <CardTitle className="font-geist">Recommended for You</CardTitle>
                 <CardDescription>
                   Based on your learning preferences
                 </CardDescription>
@@ -288,7 +288,7 @@ const Dashboard = () => {
                     <div key={course.id} className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-poppins font-semibold text-foreground">
+                          <h4 className="font-geist font-semibold text-foreground">
                             {course.title}
                           </h4>
                           <Badge variant="outline" className="text-xs">
@@ -323,7 +323,7 @@ const Dashboard = () => {
             {/* Recent Activity */}
             <Card className="border-border/50 bg-background">
               <CardHeader>
-                <CardTitle className="font-poppins">Recent Activity</CardTitle>
+                <CardTitle className="font-geist">Recent Activity</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -349,22 +349,41 @@ const Dashboard = () => {
             {/* Badges */}
             <Card className="border-border/50 bg-background">
               <CardHeader>
-                <CardTitle className="font-poppins">Your Badges</CardTitle>
+                <CardTitle className="font-geist">Your Rewards</CardTitle>
                 <CardDescription>
-                  Achievements unlocked
+                  Achievements & Milestones
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
                   {badges.map((badge, index) => (
-                    <div key={index} className={`text-center p-3 rounded-lg border-2 ${badge.earned ? 'border-primary/20 bg-primary/5' : 'border-border bg-secondary/30'}`}>
-                      <div className="text-2xl mb-2">{badge.icon}</div>
-                      <h4 className={`text-sm font-medium ${badge.earned ? 'text-foreground' : 'text-muted-foreground'}`}>
-                        {badge.title}
-                      </h4>
-                      <p className="text-xs text-muted-foreground">
-                        {badge.description}
-                      </p>
+                    <div key={index} className={`relative overflow-hidden p-4 rounded-xl border transition-all duration-300 hover:scale-105 ${badge.earned ? 'border-primary/30 bg-gradient-to-r from-primary/10 to-accent/10 shadow-lg shadow-primary/20' : 'border-border bg-muted/30'}`}>
+                      <div className="flex items-center space-x-4">
+                        <div className={`relative w-12 h-12 rounded-full flex items-center justify-center ${badge.earned ? 'bg-gradient-primary shadow-glow' : 'bg-muted'}`}>
+                          <span className="text-2xl">{badge.icon}</span>
+                          {badge.earned && (
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-success rounded-full border-2 border-background flex items-center justify-center">
+                              <div className="w-2 h-2 bg-background rounded-full"></div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className={`font-geist font-semibold text-sm ${badge.earned ? 'text-foreground' : 'text-muted-foreground'}`}>
+                            {badge.title}
+                          </h4>
+                          <p className="text-xs text-muted-foreground">
+                            {badge.description}
+                          </p>
+                          {badge.earned && (
+                            <Badge variant="outline" className="mt-2 text-xs bg-success/10 text-success border-success/20">
+                              Earned
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      {badge.earned && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-fade-in"></div>
+                      )}
                     </div>
                   ))}
                 </div>
