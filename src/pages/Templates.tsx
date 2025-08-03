@@ -3,152 +3,44 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Download, FileText, Eye, Users, Star, Filter } from "lucide-react";
+import { Search, Download, FileText, Eye, Star } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useTemplates, useDownloadTemplate } from "@/hooks/useTemplates";
+import Header from "@/components/Header";
 
 const Templates = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedAccess, setSelectedAccess] = useState("all");
+  
+  const { data: dbTemplates, isLoading } = useTemplates();
+  const downloadTemplate = useDownloadTemplate();
 
   const categories = [
     { id: "all", label: "All Categories" },
     { id: "legal", label: "Legal & Compliance" },
     { id: "finance", label: "Finance & Accounting" },
-    { id: "hr", label: "HR & Hiring" },
-    { id: "marketing", label: "Marketing & Sales" },
-    { id: "operations", label: "Operations" },
-    { id: "pitch", label: "Pitch & Presentation" },
+    { id: "business", label: "Business" },
   ];
 
-  const templates = [
-    {
-      id: 1,
-      title: "Startup Business Plan Template",
-      description: "Comprehensive business plan template tailored for Indian startups",
-      category: "finance",
-      type: "PDF",
-      size: "2.3 MB",
-      downloads: 4247,
-      rating: 4.8,
-      access: "free",
-      thumbnail: "bg-gradient-to-r from-blue-500 to-purple-600",
-      tags: ["Business Plan", "Strategy", "Financial Projections"],
-      author: "StartupSaathi Team",
-      lastUpdated: "2 days ago"
-    },
-    {
-      id: 2,
-      title: "Pitch Deck Template",
-      description: "Professional pitch deck template for investor presentations",
-      category: "pitch",
-      type: "PPT",
-      size: "8.7 MB",
-      downloads: 3156,
-      rating: 4.9,
-      access: "premium",
-      thumbnail: "bg-gradient-to-r from-pink-500 to-red-600",
-      tags: ["Pitch Deck", "Investor", "Presentation"],
-      author: "Rajesh Kumar",
-      lastUpdated: "1 week ago"
-    },
-    {
-      id: 3,
-      title: "Employee Handbook Template",
-      description: "Complete employee handbook with policies and procedures",
-      category: "hr",
-      type: "DOCX",
-      size: "1.8 MB",
-      downloads: 2134,
-      rating: 4.7,
-      access: "free",
-      thumbnail: "bg-gradient-to-r from-green-500 to-teal-600",
-      tags: ["HR", "Policies", "Employee"],
-      author: "Anita Desai",
-      lastUpdated: "3 days ago"
-    },
-    {
-      id: 4,
-      title: "NDA Template",
-      description: "Non-disclosure agreement template for startups",
-      category: "legal",
-      type: "PDF",
-      size: "486 KB",
-      downloads: 5632,
-      rating: 4.6,
-      access: "free",
-      thumbnail: "bg-gradient-to-r from-yellow-500 to-orange-600",
-      tags: ["NDA", "Legal", "Confidentiality"],
-      author: "Priya Sharma",
-      lastUpdated: "5 days ago"
-    },
-    {
-      id: 5,
-      title: "ESOP Policy Template",
-      description: "Employee stock option plan template for startups",
-      category: "hr",
-      type: "DOCX",
-      size: "1.2 MB",
-      downloads: 1876,
-      rating: 4.8,
-      access: "premium",
-      thumbnail: "bg-gradient-to-r from-purple-500 to-indigo-600",
-      tags: ["ESOP", "Equity", "Stock Options"],
-      author: "Kavya Menon",
-      lastUpdated: "1 day ago"
-    },
-    {
-      id: 6,
-      title: "Financial Model Template",
-      description: "3-year financial model template with projections",
-      category: "finance",
-      type: "XLSX",
-      size: "3.4 MB",
-      downloads: 2945,
-      rating: 4.9,
-      access: "premium",
-      thumbnail: "bg-gradient-to-r from-cyan-500 to-blue-600",
-      tags: ["Financial Model", "Projections", "Excel"],
-      author: "Suresh Patel",
-      lastUpdated: "4 days ago"
-    },
-    {
-      id: 7,
-      title: "Marketing Strategy Template",
-      description: "Go-to-market strategy template for startup launches",
-      category: "marketing",
-      type: "PDF",
-      size: "1.9 MB",
-      downloads: 3421,
-      rating: 4.7,
-      access: "free",
-      thumbnail: "bg-gradient-to-r from-emerald-500 to-green-600",
-      tags: ["Marketing", "Strategy", "GTM"],
-      author: "Arjun Singh",
-      lastUpdated: "6 days ago"
-    },
-    {
-      id: 8,
-      title: "Co-founder Agreement Template",
-      description: "Comprehensive co-founder agreement template",
-      category: "legal",
-      type: "DOCX",
-      size: "892 KB",
-      downloads: 1654,
-      rating: 4.8,
-      access: "premium",
-      thumbnail: "bg-gradient-to-r from-rose-500 to-pink-600",
-      tags: ["Co-founder", "Agreement", "Legal"],
-      author: "Priya Sharma",
-      lastUpdated: "2 weeks ago"
-    },
-  ];
+  // Use real templates from database with proper formatting
+  const templates = dbTemplates?.map(template => ({
+    ...template,
+    access: template.is_premium ? "premium" : "free",
+    type: template.file_type || "PDF",
+    size: "1.2 MB",
+    rating: 4.7,
+    thumbnail: "bg-gradient-to-r from-blue-500 to-purple-600",
+    tags: [template.category || "General"],
+    author: "StartupSaathi Team",
+    lastUpdated: new Date(template.updated_at).toLocaleDateString(),
+    downloads: template.download_count
+  })) || [];
 
   const filteredTemplates = templates.filter(template => {
     const matchesSearch = template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         template.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || template.category === selectedCategory;
+                         template.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || template.category?.toLowerCase() === selectedCategory;
     const matchesAccess = selectedAccess === "all" || template.access === selectedAccess;
     
     return matchesSearch && matchesCategory && matchesAccess;
@@ -166,38 +58,21 @@ const Templates = () => {
     return <FileText className="h-5 w-5 text-primary" />;
   };
 
+  const handleDownload = (template: any) => {
+    downloadTemplate.mutate(template);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-subtle font-inter">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-xl flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">S</span>
-              </div>
-              <span className="text-xl font-poppins font-bold text-foreground">StartupSaathi</span>
-            </Link>
-          </div>
-          
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/courses" className="text-muted-foreground hover:text-foreground transition-colors">
-              Courses
-            </Link>
-            <Link to="/templates" className="text-primary font-medium">
-              Templates
-            </Link>
-            <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
-              Dashboard
-            </Link>
-          </nav>
-          
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">Sign In</Button>
-            <Button variant="default" size="sm">Get Started</Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-subtle font-geist">
+      <Header />
 
       {/* Page Header */}
       <section className="py-12 bg-background">
@@ -321,9 +196,15 @@ const Templates = () => {
                       <Eye className="h-4 w-4 mr-1" />
                       Preview
                     </Button>
-                    <Button variant="default" size="sm" className="flex-1">
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleDownload(template)}
+                      disabled={downloadTemplate.isPending}
+                    >
                       <Download className="h-4 w-4 mr-1" />
-                      Download
+                      {downloadTemplate.isPending ? 'Downloading...' : 'Download'}
                     </Button>
                   </div>
                 </CardContent>

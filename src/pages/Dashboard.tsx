@@ -2,20 +2,31 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, FileText, Download, Trophy, Clock, Users, TrendingUp, Star, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { BookOpen, Download, Trophy, Clock, Users } from "lucide-react";
+import { Link, Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
+import { useUserProgress, useUserAchievements } from "@/hooks/useUserProgress";
+import Header from "@/components/Header";
 
 const Dashboard = () => {
-  const user = {
-    name: "Rahul Gupta",
-    email: "rahul@example.com",
-    joinDate: "March 2024",
-    totalCourses: 12,
-    completedCourses: 4,
-    templatesDownloaded: 23,
-    questionsAsked: 8
-  };
+  const { user: authUser, loading: authLoading } = useAuth();
+  const { data: profile } = useProfile();
+  const { data: userProgress } = useUserProgress();
+  const { data: achievements } = useUserAchievements();
+
+  // Redirect if not authenticated
+  if (!authLoading && !authUser) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const stats = [
     {
@@ -160,42 +171,13 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle font-geist">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-xl flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">S</span>
-              </div>
-              <span className="text-xl font-geist font-bold text-foreground">StartupSaathi</span>
-            </Link>
-          </div>
-          
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/courses" className="text-muted-foreground hover:text-foreground transition-colors">
-              Courses
-            </Link>
-            <Link to="/templates" className="text-muted-foreground hover:text-foreground transition-colors">
-              Templates
-            </Link>
-            <Link to="/dashboard" className="text-primary font-medium">
-              Dashboard
-            </Link>
-          </nav>
-          
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">Settings</Button>
-            <Button variant="default" size="sm">Upgrade</Button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-geist font-bold text-foreground mb-2">
-            Welcome back, {user.name}!
+            Welcome back, {profile?.display_name || authUser?.email?.split('@')[0] || 'Entrepreneur'}!
           </h1>
           <p className="text-muted-foreground">
             Track your progress and continue your startup journey
