@@ -3,124 +3,121 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { VideoPlayer } from "@/components/VideoPlayer";
+import Header from "@/components/Header";
 import { ArrowLeft, Play, CheckCircle, Clock, Download, BookOpen, FileText, Users, Star } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useCourse, useUpdateProgress } from "@/hooks/useCourses";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const CourseDetail = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const [currentLesson, setCurrentLesson] = useState(0);
-  const [completedLessons, setCompletedLessons] = useState<number[]>([]);
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
-  const course = {
-    id: 1,
-    title: "Startup Registration in India",
-    description: "Complete guide to legally registering your startup in India. Learn about different business structures, documentation requirements, and step-by-step registration process.",
-    category: "Legal & Compliance",
-    difficulty: "beginner",
-    duration: "2-3 hours",
-    lessons: [
-      {
-        title: "Introduction to Startup Registration",
-        duration: "10 min",
-        type: "video",
-        completed: false
-      },
-      {
-        title: "Choosing the Right Business Structure",
-        duration: "15 min",
-        type: "video",
-        completed: false
-      },
-      {
-        title: "Required Documents Checklist",
-        duration: "8 min",
-        type: "text",
-        completed: false
-      },
-      {
-        title: "Digital Signature Certificate (DSC)",
-        duration: "12 min",
-        type: "video",
-        completed: false
-      },
-      {
-        title: "Director Identification Number (DIN)",
-        duration: "10 min",
-        type: "video",
-        completed: false
-      },
-      {
-        title: "Filing Incorporation Documents",
-        duration: "20 min",
-        type: "video",
-        completed: false
-      },
-      {
-        title: "Post-Registration Compliance",
-        duration: "15 min",
-        type: "text",
-        completed: false
-      },
-      {
-        title: "Final Assessment",
-        duration: "5 min",
-        type: "quiz",
-        completed: false
+  const { data: course, isLoading } = useCourse(id!);
+  const updateProgress = useUpdateProgress();
+
+  useEffect(() => {
+    if (course?.userProgress) {
+      const completed = course.userProgress
+        .filter((p: any) => p.lesson_id && p.progress_percentage === 100)
+        .map((p: any) => p.lesson_id);
+      setCompletedLessons(completed);
+    }
+  }, [course]);
+
+  const toggleLessonComplete = async (lessonId: string) => {
+    if (!user) {
+      toast.error("Please sign in to track your progress");
+      return;
+    }
+
+    const isCompleted = completedLessons.includes(lessonId);
+    const newProgress = isCompleted ? 0 : 100;
+
+    try {
+      await updateProgress.mutateAsync({
+        courseId: id!,
+        lessonId,
+        progressPercentage: newProgress
+      });
+
+      if (isCompleted) {
+        setCompletedLessons(completedLessons.filter(id => id !== lessonId));
+      } else {
+        setCompletedLessons([...completedLessons, lessonId]);
       }
-    ],
-    enrolled: 1247,
-    rating: 4.8,
-    reviews: 156,
-    instructor: {
-      name: "Priya Sharma",
-      title: "Corporate Lawyer & Startup Advisor",
-      avatar: "PS",
-      experience: "8+ years"
-    },
-    downloads: [
-      "Startup_Registration_Checklist.pdf",
-      "Business_Structure_Comparison.xlsx",
-      "Sample_MoA_Template.docx",
-      "Post_Registration_Compliance_Guide.pdf"
-    ]
-  };
 
-  const toggleLessonComplete = (lessonIndex: number) => {
-    if (completedLessons.includes(lessonIndex)) {
-      setCompletedLessons(completedLessons.filter(i => i !== lessonIndex));
-    } else {
-      setCompletedLessons([...completedLessons, lessonIndex]);
+      toast.success(isCompleted ? "Lesson marked as incomplete" : "Lesson completed!");
+    } catch (error) {
+      toast.error("Failed to update progress");
     }
   };
 
-  const progress = (completedLessons.length / course.lessons.length) * 100;
+  const handleVideoProgress = (currentTime: number, duration: number) => {
+    if (!user || !course?.lessons?.[currentLesson]) return;
+    
+    const progressPercentage = Math.floor((currentTime / duration) * 100);
+    
+    // Auto-mark as complete when 90% watched
+    if (progressPercentage >= 90 && !completedLessons.includes(course.lessons[currentLesson].id)) {
+      toggleLessonComplete(course.lessons[currentLesson].id);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle font-inter">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+            <div className="lg:col-span-1">
+              <Skeleton className="h-96 w-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!course) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle font-inter">
+        <Header />
+        <div className="container mx-auto px-4 py-8 text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">Course not found</h1>
+          <Link to="/courses">
+            <Button>Back to Courses</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const progress = course.lessons?.length 
+    ? (completedLessons.length / course.lessons.length) * 100 
+    : 0;
+  
+  const currentLessonData = course.lessons?.[currentLesson];
+  const instructor = { 
+    display_name: (course.profiles as any)?.display_name || "Instructor", 
+    avatar_url: (course.profiles as any)?.avatar_url || null, 
+    bio: (course.profiles as any)?.bio || "" 
+  };
 
   return (
     <div className="min-h-screen bg-gradient-subtle font-inter">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link to="/courses" className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Courses</span>
-            </Link>
-            <div className="h-4 w-px bg-border"></div>
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-xl flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">S</span>
-              </div>
-              <span className="text-xl font-poppins font-bold text-foreground">StartupSaathi</span>
-            </Link>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">Sign In</Button>
-            <Button variant="default" size="sm">Get Started</Button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -130,10 +127,10 @@ const CourseDetail = () => {
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <Badge className="bg-green-100 text-green-800">
-                  {course.difficulty}
+                  {course.difficulty || 'beginner'}
                 </Badge>
                 <Badge variant="outline">
-                  {course.category}
+                  {course.categories?.name || 'General'}
                 </Badge>
               </div>
               
@@ -148,15 +145,15 @@ const CourseDetail = () => {
               <div className="flex items-center gap-6 text-sm text-muted-foreground mb-6">
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-1" />
-                  {course.duration}
+                  {Math.ceil((course.duration_minutes || 0) / 60)}h
                 </div>
                 <div className="flex items-center">
-                  <Users className="h-4 w-4 mr-1" />
-                  {course.enrolled.toLocaleString()} enrolled
+                  <BookOpen className="h-4 w-4 mr-1" />
+                  {course.lessons?.length || 0} lessons
                 </div>
                 <div className="flex items-center">
                   <Star className="h-4 w-4 mr-1 text-yellow-500" />
-                  {course.rating} ({course.reviews} reviews)
+                  {course.difficulty}
                 </div>
               </div>
               
@@ -166,7 +163,7 @@ const CourseDetail = () => {
                     Course Progress
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    {completedLessons.length} of {course.lessons.length} lessons
+                    {completedLessons.length} of {course.lessons?.length || 0} lessons
                   </span>
                 </div>
                 <Progress value={progress} className="h-2" />
@@ -174,55 +171,68 @@ const CourseDetail = () => {
             </div>
 
             {/* Video Player / Content Area */}
-            <div className="mb-8">
-              <Card className="border-border/50 bg-background">
-                <div className="aspect-video bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center rounded-t-lg">
-                  <div className="text-center">
-                    <Play className="h-16 w-16 text-primary mx-auto mb-4" />
-                    <h3 className="text-lg font-poppins font-semibold text-foreground mb-2">
-                      {course.lessons[currentLesson].title}
-                    </h3>
-                    <p className="text-muted-foreground">
-                      {course.lessons[currentLesson].duration}
-                    </p>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <Button
-                        variant={completedLessons.includes(currentLesson) ? "success" : "default"}
-                        onClick={() => toggleLessonComplete(currentLesson)}
-                        className="flex items-center space-x-2"
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                        <span>
-                          {completedLessons.includes(currentLesson) ? "Completed" : "Mark as Complete"}
-                        </span>
-                      </Button>
+            {currentLessonData && (
+              <div className="mb-8">
+                <Card className="border-border/50 bg-background">
+                  <VideoPlayer
+                    videoUrl={currentLessonData.video_url}
+                    title={currentLessonData.title}
+                    onTimeUpdate={handleVideoProgress}
+                    onEnded={() => {
+                      if (!completedLessons.includes(currentLessonData.id)) {
+                        toggleLessonComplete(currentLessonData.id);
+                      }
+                    }}
+                  />
+                  <CardContent className="p-6">
+                    <div className="mb-4">
+                      <h3 className="text-lg font-poppins font-semibold text-foreground mb-2">
+                        {currentLessonData.title}
+                      </h3>
+                      {currentLessonData.content && (
+                        <div className="prose prose-sm text-muted-foreground">
+                          {currentLessonData.content}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={currentLesson === 0}
-                        onClick={() => setCurrentLesson(currentLesson - 1)}
-                      >
-                        Previous
-                      </Button>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        disabled={currentLesson === course.lessons.length - 1}
-                        onClick={() => setCurrentLesson(currentLesson + 1)}
-                      >
-                        Next
-                      </Button>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <Button
+                          variant={completedLessons.includes(currentLessonData.id) ? "default" : "outline"}
+                          onClick={() => toggleLessonComplete(currentLessonData.id)}
+                          className="flex items-center space-x-2"
+                          disabled={updateProgress.isPending}
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                          <span>
+                            {completedLessons.includes(currentLessonData.id) ? "Completed" : "Mark as Complete"}
+                          </span>
+                        </Button>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={currentLesson === 0}
+                          onClick={() => setCurrentLesson(currentLesson - 1)}
+                        >
+                          Previous
+                        </Button>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          disabled={!course.lessons || currentLesson === course.lessons.length - 1}
+                          onClick={() => setCurrentLesson(currentLesson + 1)}
+                        >
+                          Next
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
             {/* Course Tabs */}
             <Tabs defaultValue="overview" className="w-full">
@@ -265,25 +275,15 @@ const CourseDetail = () => {
                   <CardHeader>
                     <CardTitle className="font-poppins">Course Resources</CardTitle>
                     <CardDescription>
-                      Download templates and guides to help you with your startup registration
+                      Download additional materials and resources for this course
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {course.downloads.map((download, index) => (
-                        <div key={index} className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <FileText className="h-5 w-5 text-primary" />
-                            <span className="text-sm font-medium text-foreground">
-                              {download}
-                            </span>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-1" />
-                            Download
-                          </Button>
-                        </div>
-                      ))}
+                    <div className="text-center py-8">
+                      <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">
+                        Course resources will be available after course completion
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -295,27 +295,22 @@ const CourseDetail = () => {
                     <div className="flex items-center space-x-4">
                       <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center">
                         <span className="text-primary-foreground font-bold text-lg">
-                          {course.instructor.avatar}
+                          {instructor.display_name?.charAt(0) || 'I'}
                         </span>
                       </div>
                       <div>
                         <CardTitle className="font-poppins">
-                          {course.instructor.name}
+                          {instructor.display_name || 'Course Instructor'}
                         </CardTitle>
                         <CardDescription>
-                          {course.instructor.title}
+                          Startup Expert & Educator
                         </CardDescription>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {course.instructor.experience} experience
-                        </p>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground leading-relaxed">
-                      Priya is a corporate lawyer specializing in startup law and compliance. 
-                      She has helped over 500 startups with their legal foundation and continues 
-                      to mentor entrepreneurs across India.
+                      {instructor.bio || 'An experienced professional dedicated to helping entrepreneurs succeed in their startup journey.'}
                     </p>
                   </CardContent>
                 </Card>
@@ -329,14 +324,14 @@ const CourseDetail = () => {
               <CardHeader>
                 <CardTitle className="font-poppins">Course Content</CardTitle>
                 <CardDescription>
-                  {course.lessons.length} lessons • {course.duration}
+                  {course.lessons?.length || 0} lessons • {Math.ceil((course.duration_minutes || 0) / 60)}h
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {course.lessons.map((lesson, index) => (
+                  {course.lessons?.map((lesson, index) => (
                     <div
-                      key={index}
+                      key={lesson.id}
                       className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
                         index === currentLesson
                           ? "bg-primary/10 border border-primary/20"
@@ -346,12 +341,10 @@ const CourseDetail = () => {
                     >
                       <div className="flex items-center space-x-3">
                         <div className="flex-shrink-0">
-                          {completedLessons.includes(index) ? (
+                          {completedLessons.includes(lesson.id) ? (
                             <CheckCircle className="h-5 w-5 text-success" />
-                          ) : lesson.type === "video" ? (
+                          ) : lesson.video_url ? (
                             <Play className="h-5 w-5 text-muted-foreground" />
-                          ) : lesson.type === "quiz" ? (
-                            <BookOpen className="h-5 w-5 text-muted-foreground" />
                           ) : (
                             <FileText className="h-5 w-5 text-muted-foreground" />
                           )}
@@ -361,12 +354,17 @@ const CourseDetail = () => {
                             {lesson.title}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {lesson.duration}
+                            {lesson.duration_minutes ? `${lesson.duration_minutes} min` : 'Content lesson'}
                           </p>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )) || (
+                    <div className="text-center py-8">
+                      <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No lessons available</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
