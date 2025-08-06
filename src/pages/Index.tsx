@@ -10,11 +10,36 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const trendingTopics = [
-    { title: "How to register a startup in India?", category: "Legal", responses: 156 },
-    { title: "Setting up ESOP for employees", category: "HR", responses: 89 },
-    { title: "Understanding GST for startups", category: "Finance", responses: 203 },
-    { title: "Raising seed funding", category: "Funding", responses: 134 },
-    { title: "Co-founder equity split", category: "Legal", responses: 78 },
+    { 
+      title: "How to register a startup in India?", 
+      category: "Legal", 
+      responses: 156,
+      url: "https://www.startupindia.gov.in/content/sih/en/startup-scheme/startup-registration.html"
+    },
+    { 
+      title: "Setting up ESOP for employees", 
+      category: "HR", 
+      responses: 89,
+      url: "https://economictimes.indiatimes.com/small-biz/startups/newsbuzz/how-to-set-up-an-esop-plan-for-your-startup/articleshow/72900123.cms"
+    },
+    { 
+      title: "Understanding GST for startups", 
+      category: "Finance", 
+      responses: 203,
+      url: "https://www.gst.gov.in/help/helpmodules/registration"
+    },
+    { 
+      title: "Raising seed funding", 
+      category: "Funding", 
+      responses: 134,
+      url: "https://yourstory.com/2019/02/startup-fundraising-guide-seed-funding"
+    },
+    { 
+      title: "Co-founder equity split", 
+      category: "Legal", 
+      responses: 78,
+      url: "https://inc42.com/resources/startup-equity-distribution-among-co-founders/"
+    },
   ];
 
   const quickActions = [
@@ -152,7 +177,11 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {trendingTopics.map((topic, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-border/50 bg-background cursor-pointer">
+              <Card 
+                key={index} 
+                className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-border/50 bg-background cursor-pointer"
+                onClick={() => window.open(topic.url, '_blank')}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between mb-2">
                     <Badge variant="secondary" className="text-xs">
