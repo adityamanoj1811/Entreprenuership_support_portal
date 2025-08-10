@@ -7,7 +7,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -22,10 +21,25 @@ serve(async (req) => {
       });
     }
 
-    const { prompt } = await req.json();
+    const body = await req.json();
+    const { prompt, messages } = body || {};
 
-    if (!prompt || typeof prompt !== 'string') {
-      return new Response(JSON.stringify({ error: 'Missing prompt' }), {
+    let contents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+
+    if (Array.isArray(messages) && messages.length > 0) {
+      contents = messages.map((m: any) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: String(m.content || '') }],
+      }));
+    } else if (typeof prompt === 'string' && prompt.trim()) {
+      contents = [
+        {
+          role: 'user',
+          parts: [{ text: String(prompt).slice(0, 16000) }],
+        },
+      ];
+    } else {
+      return new Response(JSON.stringify({ error: 'Missing prompt or messages' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -35,14 +49,7 @@ serve(async (req) => {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     const payload = {
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            { text: String(prompt).slice(0, 16000) },
-          ],
-        },
-      ],
+      contents,
       generationConfig: {
         temperature: 0.2,
         topP: 0.9,
@@ -50,7 +57,7 @@ serve(async (req) => {
       },
     };
 
-    console.log('Calling Gemini with prompt length:', String(prompt).length);
+    console.log('Calling Gemini. Messages:', contents.length);
 
     const response = await fetch(url, {
       method: 'POST',
@@ -70,8 +77,6 @@ serve(async (req) => {
 
     const parts = data?.candidates?.[0]?.content?.parts || [];
     const text = parts.map((p: any) => p?.text ?? '').join('').trim();
-
-    console.log('Gemini response length:', text.length);
 
     return new Response(JSON.stringify({ text }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

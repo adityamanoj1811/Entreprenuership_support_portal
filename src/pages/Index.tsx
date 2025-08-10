@@ -5,42 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { Search, ArrowRight, BookOpen, FileText, Users, TrendingUp, Download, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import ChatWindow from "@/components/ChatWindow";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [answer, setAnswer] = useState<string | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const { toast } = useToast();
+  const [chatOpen, setChatOpen] = useState(false);
 
-  const handleAsk = async () => {
+  const handleAsk = () => {
     const q = searchQuery.trim();
-    if (!q) {
-      toast({ title: "Please enter a question", variant: "destructive" });
-      return;
-    }
-    try {
-      setLoading(true);
-      setErrorMsg(null);
-      setAnswer(null);
-      const { data, error } = await supabase.functions.invoke('ask-gemini', {
-        body: { prompt: q },
-      });
-      if (error) {
-        console.error('ask-gemini error:', error);
-        setErrorMsg(error.message || 'Failed to get answer');
-        toast({ title: "Request failed", description: error.message, variant: "destructive" });
-      } else {
-        setAnswer((data as any)?.text ?? "No answer available.");
-      }
-    } catch (e: any) {
-      console.error('ask-gemini exception:', e);
-      setErrorMsg(e?.message || 'Something went wrong');
-    } finally {
-      setLoading(false);
-    }
+    if (!q) return;
+    setChatOpen(true);
   };
 
   const trendingTopics = [
@@ -171,35 +145,10 @@ const Index = () => {
                 variant="default" 
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10"
                 onClick={handleAsk}
-                disabled={loading}
               >
-                {loading ? "Asking..." : "Ask Now"}
+                Ask Now
               </Button>
             </div>
-
-            {(loading || answer || errorMsg) && (
-              <div className="mt-4 text-left">
-                <Card className="border-border/50">
-                  <CardHeader>
-                    <CardTitle className="text-base">AI Answer</CardTitle>
-                    {errorMsg && (
-                      <CardDescription className="text-destructive">{errorMsg}</CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    {loading ? (
-                      <div className="animate-pulse space-y-2">
-                        <div className="h-4 bg-muted rounded" />
-                        <div className="h-4 bg-muted rounded w-5/6" />
-                        <div className="h-4 bg-muted rounded w-2/3" />
-                      </div>
-                    ) : (
-                      <p className="whitespace-pre-wrap text-foreground/90">{answer}</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
@@ -319,6 +268,8 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      <ChatWindow open={chatOpen} onOpenChange={setChatOpen} initialQuery={searchQuery} />
 
       {/* Footer */}
       <footer className="bg-background border-t border-border py-12">
