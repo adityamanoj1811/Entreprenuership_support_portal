@@ -90,7 +90,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-subtle font-inter">
+    <div className="min-h-screen bg-background bg-grid font-inter">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
