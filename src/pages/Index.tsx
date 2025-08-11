@@ -6,6 +6,7 @@ import { Search, ArrowRight, BookOpen, FileText, Users, TrendingUp, Download, Me
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import ChatWindow from "@/components/ChatWindow";
+import premiumWorkspace from "@/assets/premium-workspace.jpg";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -90,7 +91,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background bg-grid font-inter">
+    <div className="min-h-screen bg-background bg-vignette font-inter">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -115,45 +116,45 @@ const Index = () => {
           
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="sm">Sign In</Button>
-            <Button variant="default" size="sm">Get Started</Button>
+            <Button variant="premium" size="sm">Join Beta</Button>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-poppins font-bold text-foreground mb-6 leading-tight">
+      <section className="relative overflow-hidden py-16 md:py-24">
+        <img src={premiumWorkspace} alt="Premium startup workspace" loading="lazy" className="pointer-events-none select-none absolute inset-0 w-full h-full object-cover opacity-10" />
+        <div className="container relative mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-poppins font-bold text-foreground mb-6 leading-tight tracking-wide animate-fade-in">
             What's confusing you
-            <span className="bg-gradient-primary bg-clip-text text-transparent"> today</span>?
+            <span className="bg-gradient-accent bg-clip-text text-transparent"> today</span>?
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '100ms' }}>
             Ask any startup question and get detailed, step-by-step guidance from experts who understand the Indian ecosystem.
           </p>
-          
-          <div className="max-w-2xl mx-auto mb-12">
+          <div className="max-w-2xl mx-auto mb-12 animate-fade-in" style={{ animationDelay: '200ms' }}>
             <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
               <Input
                 placeholder="e.g., How do I register my startup in India?"
-                className="pl-12 pr-4 py-6 text-lg bg-background border-2 border-border hover:border-primary focus:border-primary transition-colors shadow-md"
+                className="pl-12 pr-4 py-6 text-lg bg-background/80 border border-accent/20 hover:border-accent/40 focus:border-accent transition-colors shadow-md"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleAsk(); }}
               />
               <Button 
-                variant="default" 
+                variant="premium" 
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10"
                 onClick={handleAsk}
               >
-                Ask Now
+                Launch Now
               </Button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
             {quickActions.map((action, index) => (
-              <Link key={index} to={action.href}>
+              <Link key={index} to={action.href} className="animate-fade-in" style={{ animationDelay: `${(index+1)*120}ms` }}>
                 <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-border/50 bg-background/80 backdrop-blur">
                   <CardHeader className="pb-3">
                     <div className={`w-12 h-12 rounded-xl ${action.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300`}>

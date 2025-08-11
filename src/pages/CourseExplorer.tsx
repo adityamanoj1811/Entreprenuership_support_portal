@@ -52,7 +52,7 @@ const CourseExplorer = () => {
 
   if (coursesLoading || categoriesLoading) {
     return (
-      <div className="min-h-screen bg-background bg-grid font-inter">
+      <div className="min-h-screen bg-background bg-vignette font-inter">
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -77,7 +77,7 @@ const CourseExplorer = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background bg-grid font-inter">
+    <div className="min-h-screen bg-background bg-vignette font-inter">
       <Header />
 
       {/* Page Header */}

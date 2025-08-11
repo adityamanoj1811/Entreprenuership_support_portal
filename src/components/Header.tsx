@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, BookOpen, Layers, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,16 +20,19 @@ const Header = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
-          <Link to="/courses" className="text-muted-foreground hover:text-foreground transition-colors">
-            Courses
+        <nav className="hidden md:flex items-center space-x-2">
+          <Link to="/courses" aria-label="Courses" className="p-2 rounded-md text-muted-foreground hover:text-accent hover:bg-muted/10 transition-colors">
+            <BookOpen className="h-5 w-5" />
+            <span className="sr-only">Courses</span>
           </Link>
-          <Link to="/templates" className="text-muted-foreground hover:text-foreground transition-colors">
-            Templates
+          <Link to="/templates" aria-label="Templates" className="p-2 rounded-md text-muted-foreground hover:text-accent hover:bg-muted/10 transition-colors">
+            <Layers className="h-5 w-5" />
+            <span className="sr-only">Templates</span>
           </Link>
           {user && (
-            <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
-              Dashboard
+            <Link to="/dashboard" aria-label="Dashboard" className="p-2 rounded-md text-muted-foreground hover:text-accent hover:bg-muted/10 transition-colors">
+              <LayoutDashboard className="h-5 w-5" />
+              <span className="sr-only">Dashboard</span>
             </Link>
           )}
         </nav>
@@ -59,8 +62,8 @@ const Header = () => {
               <Button variant="ghost" asChild>
                 <Link to="/auth">Sign In</Link>
               </Button>
-              <Button variant="gradient" asChild>
-                <Link to="/auth">Get Started</Link>
+              <Button variant="premium" asChild>
+                <Link to="/auth">Join Beta</Link>
               </Button>
             </>
           )}
@@ -103,7 +106,7 @@ const Header = () => {
                     <Link to="/auth">Sign In</Link>
                   </Button>
                   <Button variant="gradient" className="w-full" asChild>
-                    <Link to="/auth">Get Started</Link>
+                    <Link to="/auth">Join Beta</Link>
                   </Button>
                 </>
               )}
