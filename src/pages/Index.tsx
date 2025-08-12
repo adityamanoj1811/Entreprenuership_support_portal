@@ -4,18 +4,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Search, ArrowRight, BookOpen, FileText, Users, TrendingUp, Download, MessageCircle } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ChatWindow from "@/components/ChatWindow";
 import premiumWorkspace from "@/assets/premium-workspace.jpg";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleAsk = () => {
     const q = searchQuery.trim();
     if (!q) return;
     setChatOpen(true);
+  };
+
+  const handleLogoClick = () => {
+    if (user) navigate("/dashboard");
+    else navigate("/auth");
   };
 
   const trendingTopics = [
@@ -92,8 +100,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background bg-vignette font-inter">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+      {/* Header - Minimal premium nav */}
+      <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-primary rounded-xl flex items-center justify-center">
@@ -102,21 +110,19 @@ const Index = () => {
             <span className="text-xl font-poppins font-bold text-foreground">StartupSaathi</span>
           </div>
           
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/courses" className="text-muted-foreground hover:text-foreground transition-colors">
-              Courses
-            </Link>
-            <Link to="/templates" className="text-muted-foreground hover:text-foreground transition-colors">
-              Templates
-            </Link>
-            <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
-              Dashboard
-            </Link>
+          <nav className="hidden md:flex items-center space-x-6">
+            <button onClick={() => setChatOpen(true)} className="text-muted-foreground hover:text-foreground transition-colors">AI Concierge</button>
+            <Link to="/templates" className="text-muted-foreground hover:text-foreground transition-colors">Resources</Link>
           </nav>
           
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">Sign In</Button>
-            <Button variant="premium" size="sm">Join Beta</Button>
+          <div className="flex items-center">
+            <button
+              onClick={handleLogoClick}
+              aria-label={user ? 'Go to Dashboard' : 'Sign In'}
+              className="w-9 h-9 rounded-full border border-border/60 bg-background/60 hover:bg-background transition-colors flex items-center justify-center"
+            >
+              <span className="text-xs font-bold">S</span>
+            </button>
           </div>
         </div>
       </header>
@@ -293,7 +299,7 @@ const Index = () => {
               <ul className="space-y-2 text-sm">
                 <li><Link to="/courses" className="text-muted-foreground hover:text-foreground transition-colors">Courses</Link></li>
                 <li><Link to="/templates" className="text-muted-foreground hover:text-foreground transition-colors">Templates</Link></li>
-                <li><Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link></li>
+                
               </ul>
             </div>
             
