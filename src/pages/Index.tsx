@@ -139,18 +139,20 @@ const Index = () => {
             Ask any startup question and get detailed, step-by-step guidance from experts who understand the Indian ecosystem.
           </p>
           <div className="max-w-2xl mx-auto mb-12 animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-              <Input
-                placeholder="e.g., How do I register my startup in India?"
-                className="pl-12 pr-4 py-6 text-lg bg-background/80 border border-accent/20 hover:border-accent/40 focus:border-accent transition-colors shadow-md"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleAsk(); }}
-              />
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                <Input
+                  placeholder="e.g., How do I register my startup in India?"
+                  className="pl-12 pr-4 py-6 text-lg bg-background/80 border border-accent/20 hover:border-accent/40 focus:border-accent transition-colors shadow-md"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleAsk(); }}
+                />
+              </div>
               <Button 
                 variant="premium" 
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10"
+                className="h-12 px-6"
                 onClick={handleAsk}
               >
                 Launch Now

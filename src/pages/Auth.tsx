@@ -99,6 +99,19 @@ const Auth = () => {
     }
   };
 
+  const handleOAuth = async (provider: 'google' | 'apple') => {
+    try {
+      const redirectTo = `${window.location.origin}/`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo }
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      toast({ title: "Sign-in failed", description: err?.message || "Please try again.", variant: "destructive" });
+    }
+  };
+
   const newsFeed = [
     { title: "RBI eases norms for startup foreign funding", tag: "Policy", url: "https://www.rbi.org.in/" },
     { title: "How Indian SaaS is scaling globally in 2025", tag: "SaaS", url: "https://saasboomi.com/" },
@@ -178,6 +191,15 @@ const Auth = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="space-y-3 mb-6">
+                <Button type="button" variant="outline" className="w-full" onClick={() => handleOAuth('google')}>
+                  Continue with Google
+                </Button>
+                <Button type="button" variant="outline" className="w-full" onClick={() => handleOAuth('apple')}>
+                  Continue with Apple
+                </Button>
+                <div className="text-center text-sm text-muted-foreground">or continue with email</div>
+              </div>
               <Tabs defaultValue="signin" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger value="signin">Sign In</TabsTrigger>
