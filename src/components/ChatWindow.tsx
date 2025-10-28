@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Send, Loader2 } from "lucide-react";
 
@@ -58,16 +57,67 @@ export default function ChatWindow({ open, onOpenChange, initialQuery }: ChatWin
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("ask-gemini", {
-        body: { messages: newMessages },
-      });
+      const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+      if (!API_KEY) throw new Error("VITE_GEMINI_API_KEY is not set");
+      const MODEL = (import.meta.env.VITE_GEMINI_MODEL as string | undefined) || "gemini-2.5-flash-lite";
 
-      if (error) throw error;
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  {
+                    text: `You are a sharp, practical startup advisor. Produce plain text (no markdown bold). Be concise but helpful.
 
-      const assistantText = (data as any)?.text ?? "";
-      setMessages((prev) => [...prev, { role: "assistant", content: assistantText }]);
+Format:
+- Give a structured, readable answer with short paragraphs or bullets.
+- Use blank lines between sections for smooth readability.
+- Then ask 2-3 tailored follow-up questions based on the user's query to clarify goals or constraints.
+- Keep the total output within 20 lines.
+
+User question: ${content}`,
+                  },
+                ],
+              },
+            ],
+            generationConfig: { temperature: 0.85, topP: 0.95, maxOutputTokens: 900 },
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Gemini error ${res.status}: ${errText}`);
+      }
+
+      const data = await res.json();
+      const assistantText =
+        (data?.candidates?.[0]?.content?.parts || [])
+          .map((p: any) => p?.text || "")
+          .join("");
+
+      const noBold = assistantText
+        .replace(/\*\*(.*?)\*\*/g, "$1")
+        .replace(/__(.*?)__/g, "$1");
+      const limited = noBold.split("\n").slice(0, 20).join("\n");
+
+      const baseLines = limited
+        .split("\n")
+        .map((l) => l.trim())
+        .filter((l, i, arr) => !(l === "" && arr[i - 1] === ""));
+
+      // Keep Gemini's tailored answer and follow-ups, just clean and cap lines
+      const cleanedLines = baseLines;
+      const finalOut = cleanedLines.slice(0, 20).join("\n");
+
+      setMessages((prev) => [...prev, { role: "assistant", content: finalOut }]);
     } catch (e: any) {
-      console.error("ask-gemini error:", e);
+      console.error("gemini error:", e);
       toast({ title: "Chat error", description: e?.message || "Failed to get response", variant: "destructive" });
     } finally {
       setLoading(false);
