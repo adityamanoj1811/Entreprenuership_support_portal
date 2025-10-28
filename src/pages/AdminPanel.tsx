@@ -1,3 +1,5 @@
+"use client";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,221 +7,118 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Users, 
-  BookOpen, 
-  FileText, 
-  HelpCircle, 
-  TrendingUp, 
-  Download, 
-  Eye, 
-  Plus, 
-  Edit, 
+import {
+  Users,
+  BookOpen,
+  FileText,
+  HelpCircle,
+  TrendingUp,
+  Download,
+  Eye,
+  Plus,
+  Edit,
   Trash2,
   Search,
   Filter,
-  Settings
+  Settings,
+  Upload
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { FileUpload } from "@/components/ui/fileupload"; // <- new import
+import { supabase } from "@/integrations/supabase/client";
+
+
 
 const AdminPanel = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // <- new state
+  const [uploading, setUploading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [accessType, setAccessType] = useState("");
+
+  const handleFileUpload = async (files: File[]) => {
+  const file = files[0];
+  if (!file) return;
+  if (!selectedCategory || !accessType) {
+    alert("Please select both category and access type!");
+    return;
+  }
+
+  setUploading(true);
+  const filePath = `uploads/${Date.now()}_${file.name}`;
+
+  const { data, error } = await supabase.storage
+    .from("Templates")
+    .upload(filePath, file);
+
+  if (error) {
+    console.error("Upload failed:", error.message);
+    alert("Upload failed: " + error.message);
+    setUploading(false);
+    return;
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from("Templates")
+    .getPublicUrl(filePath);
+
+  // Insert file info into templates table
+  const { error: dbError } = await supabase.from("templates").insert({
+    title: file.name,
+    description: "",
+    category: selectedCategory,
+    file_type: file.type,
+    file_url: publicUrlData.publicUrl,
+    is_premium: accessType === "premium",
+    creator_id: (await supabase.auth.getUser()).data.user?.id,
+  });
+
+  if (dbError) {
+    console.error("Database insert failed:", dbError.message);
+    alert("Database insert failed: " + dbError.message);
+  } else {
+    alert("File uploaded and record saved successfully!");
+  }
+
+  setUploading(false);
+};
+
+
 
   const stats = [
-    {
-      title: "Total Users",
-      value: "12,456",
-      change: "+8.2%",
-      icon: Users,
-      color: "text-primary"
-    },
-    {
-      title: "Active Courses",
-      value: "47",
-      change: "+3 this month",
-      icon: BookOpen,
-      color: "text-success"
-    },
-    {
-      title: "Templates",
-      value: "156",
-      change: "+12 this month",
-      icon: FileText,
-      color: "text-accent"
-    },
-    {
-      title: "Questions Asked",
-      value: "3,248",
-      change: "+156 this week",
-      icon: HelpCircle,
-      color: "text-warning"
-    },
+    { title: "Total Users", value: "12,456", change: "+8.2%", icon: Users, color: "text-primary" },
+    { title: "Active Courses", value: "47", change: "+3 this month", icon: BookOpen, color: "text-success" },
+    { title: "Templates", value: "156", change: "+12 this month", icon: FileText, color: "text-accent" },
+    { title: "Questions Asked", value: "3,248", change: "+156 this week", icon: HelpCircle, color: "text-warning" },
   ];
 
   const recentUsers = [
-    {
-      id: 1,
-      name: "Rahul Sharma",
-      email: "rahul@example.com",
-      joinDate: "2024-01-15",
-      status: "active",
-      courses: 3,
-      templates: 12
-    },
-    {
-      id: 2,
-      name: "Priya Patel",
-      email: "priya@example.com",
-      joinDate: "2024-01-14",
-      status: "active",
-      courses: 1,
-      templates: 5
-    },
-    {
-      id: 3,
-      name: "Arjun Kumar",
-      email: "arjun@example.com",
-      joinDate: "2024-01-13",
-      status: "inactive",
-      courses: 0,
-      templates: 2
-    },
-    {
-      id: 4,
-      name: "Kavya Menon",
-      email: "kavya@example.com",
-      joinDate: "2024-01-12",
-      status: "active",
-      courses: 5,
-      templates: 18
-    },
-    {
-      id: 5,
-      name: "Suresh Gupta",
-      email: "suresh@example.com",
-      joinDate: "2024-01-11",
-      status: "active",
-      courses: 2,
-      templates: 8
-    },
+    { id: 1, name: "Rahul Sharma", email: "rahul@example.com", joinDate: "2024-01-15", status: "active", courses: 3, templates: 12 },
+    { id: 2, name: "Priya Patel", email: "priya@example.com", joinDate: "2024-01-14", status: "active", courses: 1, templates: 5 },
+    { id: 3, name: "Arjun Kumar", email: "arjun@example.com", joinDate: "2024-01-13", status: "inactive", courses: 0, templates: 2 },
+    { id: 4, name: "Kavya Menon", email: "kavya@example.com", joinDate: "2024-01-12", status: "active", courses: 5, templates: 18 },
+    { id: 5, name: "Suresh Gupta", email: "suresh@example.com", joinDate: "2024-01-11", status: "active", courses: 2, templates: 8 },
   ];
 
   const courses = [
-    {
-      id: 1,
-      title: "Startup Registration in India",
-      instructor: "Priya Sharma",
-      enrolled: 1247,
-      status: "published",
-      created: "2024-01-10",
-      category: "Legal"
-    },
-    {
-      id: 2,
-      title: "Funding Your Startup",
-      instructor: "Rajesh Kumar",
-      enrolled: 892,
-      status: "published",
-      created: "2024-01-08",
-      category: "Finance"
-    },
-    {
-      id: 3,
-      title: "Building Your First Team",
-      instructor: "Anita Desai",
-      enrolled: 654,
-      status: "draft",
-      created: "2024-01-05",
-      category: "HR"
-    },
-    {
-      id: 4,
-      title: "Digital Marketing for Startups",
-      instructor: "Kavya Menon",
-      enrolled: 2156,
-      status: "published",
-      created: "2024-01-03",
-      category: "Marketing"
-    },
+    { id: 1, title: "Startup Registration in India", instructor: "Priya Sharma", enrolled: 1247, status: "published", created: "2024-01-10", category: "Legal" },
+    { id: 2, title: "Funding Your Startup", instructor: "Rajesh Kumar", enrolled: 892, status: "published", created: "2024-01-08", category: "Finance" },
+    { id: 3, title: "Building Your First Team", instructor: "Anita Desai", enrolled: 654, status: "draft", created: "2024-01-05", category: "HR" },
+    { id: 4, title: "Digital Marketing for Startups", instructor: "Kavya Menon", enrolled: 2156, status: "published", created: "2024-01-03", category: "Marketing" },
   ];
 
   const templates = [
-    {
-      id: 1,
-      title: "Business Plan Template",
-      category: "Finance",
-      downloads: 4247,
-      status: "published",
-      created: "2024-01-15",
-      author: "StartupSaathi Team"
-    },
-    {
-      id: 2,
-      title: "Pitch Deck Template",
-      category: "Pitch",
-      downloads: 3156,
-      status: "published",
-      created: "2024-01-12",
-      author: "Rajesh Kumar"
-    },
-    {
-      id: 3,
-      title: "NDA Template",
-      category: "Legal",
-      downloads: 5632,
-      status: "published",
-      created: "2024-01-10",
-      author: "Priya Sharma"
-    },
-    {
-      id: 4,
-      title: "Employee Handbook",
-      category: "HR",
-      downloads: 2134,
-      status: "draft",
-      created: "2024-01-08",
-      author: "Anita Desai"
-    },
+    { id: 1, title: "Business Plan Template", category: "Finance", downloads: 4247, status: "published", created: "2024-01-15", author: "StartupSaathi Team" },
+    { id: 2, title: "Pitch Deck Template", category: "Pitch", downloads: 3156, status: "published", created: "2024-01-12", author: "Rajesh Kumar" },
+    { id: 3, title: "NDA Template", category: "Legal", downloads: 5632, status: "published", created: "2024-01-10", author: "Priya Sharma" },
+    { id: 4, title: "Employee Handbook", category: "HR", downloads: 2134, status: "draft", created: "2024-01-08", author: "Anita Desai" },
   ];
 
   const questions = [
-    {
-      id: 1,
-      question: "How to register a startup in India?",
-      user: "Rahul Sharma",
-      category: "Legal",
-      status: "answered",
-      created: "2024-01-15",
-      responses: 3
-    },
-    {
-      id: 2,
-      question: "What are the tax benefits for startups?",
-      user: "Priya Patel",
-      category: "Finance",
-      status: "pending",
-      created: "2024-01-14",
-      responses: 0
-    },
-    {
-      id: 3,
-      question: "How to protect intellectual property?",
-      user: "Arjun Kumar",
-      category: "Legal",
-      status: "answered",
-      created: "2024-01-13",
-      responses: 2
-    },
-    {
-      id: 4,
-      question: "Best practices for hiring first employees?",
-      user: "Kavya Menon",
-      category: "HR",
-      status: "answered",
-      created: "2024-01-12",
-      responses: 4
-    },
+    { id: 1, question: "How to register a startup in India?", user: "Rahul Sharma", category: "Legal", status: "answered", created: "2024-01-15", responses: 3 },
+    { id: 2, question: "What are the tax benefits for startups?", user: "Priya Patel", category: "Finance", status: "pending", created: "2024-01-14", responses: 0 },
+    { id: 3, question: "How to protect intellectual property?", user: "Arjun Kumar", category: "Legal", status: "answered", created: "2024-01-13", responses: 2 },
+    { id: 4, question: "Best practices for hiring first employees?", user: "Kavya Menon", category: "HR", status: "answered", created: "2024-01-12", responses: 4 },
   ];
 
   const getStatusBadge = (status: string) => {
@@ -238,6 +137,7 @@ const AdminPanel = () => {
     }
   };
 
+
   return (
     <div className="min-h-screen bg-gradient-subtle font-inter">
       {/* Header */}
@@ -252,7 +152,7 @@ const AdminPanel = () => {
             </Link>
             <Badge variant="outline" className="ml-2">Admin</Badge>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="sm">
               <Settings className="h-4 w-4 mr-2" />
@@ -269,12 +169,8 @@ const AdminPanel = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-poppins font-bold text-foreground mb-2">
-            Admin Dashboard
-          </h1>
-          <p className="text-muted-foreground">
-            Manage users, courses, templates, and platform analytics
-          </p>
+          <h1 className="text-3xl font-poppins font-bold text-foreground mb-2">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Manage users, courses, templates, and platform analytics</p>
         </div>
 
         {/* Stats Cards */}
@@ -288,15 +184,9 @@ const AdminPanel = () => {
                   </div>
                   <TrendingUp className="h-4 w-4 text-success" />
                 </div>
-                <h3 className="text-2xl font-bold text-foreground mb-1">
-                  {stat.value}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-1">
-                  {stat.title}
-                </p>
-                <p className="text-xs text-success">
-                  {stat.change}
-                </p>
+                <h3 className="text-2xl font-bold text-foreground mb-1">{stat.value}</h3>
+                <p className="text-sm text-muted-foreground mb-1">{stat.title}</p>
+                <p className="text-xs text-success">{stat.change}</p>
               </CardContent>
             </Card>
           ))}
@@ -304,24 +194,25 @@ const AdminPanel = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          {/* increased to 6 columns to include Upload tab */}
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="courses">Courses</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="questions">Questions</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="upload">Upload Docs</TabsTrigger> {/* <- new trigger */}
           </TabsList>
-          
+
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-6">
+            {/* ... existing Users content (unchanged) */}
             <Card className="border-border/50 bg-background">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="font-poppins">Users Management</CardTitle>
-                    <CardDescription>
-                      Manage platform users and their access
-                    </CardDescription>
+                    <CardDescription>Manage platform users and their access</CardDescription>
                   </div>
                   <Button variant="default" size="sm">
                     <Plus className="h-4 w-4 mr-2" />
@@ -333,17 +224,10 @@ const AdminPanel = () => {
                 <div className="flex items-center space-x-4 mb-6">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                    <Input
-                      placeholder="Search users..."
-                      className="pl-10"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                    <Input placeholder="Search users..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                   </div>
                   <Select>
-                    <SelectTrigger className="w-32">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
+                    <SelectTrigger className="w-32"><SelectValue placeholder="Status" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All</SelectItem>
                       <SelectItem value="active">Active</SelectItem>
@@ -375,15 +259,9 @@ const AdminPanel = () => {
                         <TableCell>{user.templates}</TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm"><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -396,14 +274,13 @@ const AdminPanel = () => {
 
           {/* Courses Tab */}
           <TabsContent value="courses" className="space-y-6">
+            {/* ... existing Courses content (unchanged) */}
             <Card className="border-border/50 bg-background">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="font-poppins">Courses Management</CardTitle>
-                    <CardDescription>
-                      Manage courses and their content
-                    </CardDescription>
+                    <CardDescription>Manage courses and their content</CardDescription>
                   </div>
                   <Button variant="default" size="sm">
                     <Plus className="h-4 w-4 mr-2" />
@@ -435,15 +312,9 @@ const AdminPanel = () => {
                         <TableCell>{course.created}</TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm"><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -456,14 +327,13 @@ const AdminPanel = () => {
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
+            {/* ... existing Templates content (unchanged) */}
             <Card className="border-border/50 bg-background">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="font-poppins">Templates Management</CardTitle>
-                    <CardDescription>
-                      Manage templates and downloadable resources
-                    </CardDescription>
+                    <CardDescription>Manage templates and downloadable resources</CardDescription>
                   </div>
                   <Button variant="default" size="sm">
                     <Plus className="h-4 w-4 mr-2" />
@@ -495,15 +365,9 @@ const AdminPanel = () => {
                         <TableCell>{template.created}</TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm"><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -516,14 +380,13 @@ const AdminPanel = () => {
 
           {/* Questions Tab */}
           <TabsContent value="questions" className="space-y-6">
+            {/* ... existing Questions content (unchanged) */}
             <Card className="border-border/50 bg-background">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="font-poppins">Questions Management</CardTitle>
-                    <CardDescription>
-                      Manage user questions and expert responses
-                    </CardDescription>
+                    <CardDescription>Manage user questions and expert responses</CardDescription>
                   </div>
                   <Button variant="default" size="sm">
                     <Plus className="h-4 w-4 mr-2" />
@@ -547,9 +410,7 @@ const AdminPanel = () => {
                   <TableBody>
                     {questions.map((question) => (
                       <TableRow key={question.id}>
-                        <TableCell className="font-medium max-w-xs truncate">
-                          {question.question}
-                        </TableCell>
+                        <TableCell className="font-medium max-w-xs truncate">{question.question}</TableCell>
                         <TableCell>{question.user}</TableCell>
                         <TableCell>{question.category}</TableCell>
                         <TableCell>{getStatusBadge(question.status)}</TableCell>
@@ -557,15 +418,9 @@ const AdminPanel = () => {
                         <TableCell>{question.created}</TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm"><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -578,12 +433,11 @@ const AdminPanel = () => {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* ... existing Analytics content (unchanged) */}
             <Card className="border-border/50 bg-background">
               <CardHeader>
                 <CardTitle className="font-poppins">Platform Analytics</CardTitle>
-                <CardDescription>
-                  View detailed analytics and insights
-                </CardDescription>
+                <CardDescription>View detailed analytics and insights</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -604,7 +458,7 @@ const AdminPanel = () => {
                       ))}
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <h3 className="font-poppins font-semibold text-foreground">Most Downloaded Templates</h3>
                     <div className="space-y-3">
@@ -626,6 +480,99 @@ const AdminPanel = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* ---------- Upload Docs Tab (NEW) ---------- */}
+          {/* ---------- Upload Docs Tab (UPDATED) ---------- */}
+          <TabsContent value="upload" className="space-y-6">
+            <Card className="border-border/50 bg-background">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="font-poppins">Upload Documents</CardTitle>
+                    <CardDescription>
+                      Upload new templates, course materials, or startup resources
+                    </CardDescription>
+                  </div>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => {
+                      if (uploadedFiles.length === 0) {
+                        alert("Please select a file first!");
+                        return;
+                      }
+                      handleFileUpload(uploadedFiles);
+                    }}
+                    disabled={uploading}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {uploading ? "Uploading..." : "Upload"}
+                  </Button>
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                <div className="w-full max-w-4xl mx-auto border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg p-6 space-y-6">
+
+                  {/* Select Category */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Document Category</label>
+                    <Select
+                      onValueChange={(value) => setSelectedCategory(value)}
+                      value={selectedCategory}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Legal and Compliance">Legal and Compliance</SelectItem>
+                        <SelectItem value="Finance and Accounting">Finance and Accounting</SelectItem>
+                        <SelectItem value="Business">Business</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Select Access Type */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Access Type</label>
+                    <Select
+                      onValueChange={(value) => setAccessType(value)}
+                      value={accessType}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Access" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="free">Free</SelectItem>
+                        <SelectItem value="premium">Premium</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Upload File */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Select File</label>
+                    <FileUpload onChange={setUploadedFiles} />
+                  </div>
+
+                  {/* Show selected files */}
+                  {uploadedFiles.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="font-medium mb-2">Selected Files</h4>
+                      <ul className="list-disc list-inside text-sm text-muted-foreground">
+                        {uploadedFiles.map((file, idx) => (
+                          <li key={idx}>
+                            {file.name} • {(file.size / 1024 / 1024).toFixed(2)} MB
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
         </Tabs>
       </div>
     </div>
@@ -633,3 +580,4 @@ const AdminPanel = () => {
 };
 
 export default AdminPanel;
+

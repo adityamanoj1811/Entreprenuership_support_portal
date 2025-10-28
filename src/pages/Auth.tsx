@@ -55,6 +55,42 @@ const Auth = () => {
     e.preventDefault();
     await signUp(formData.email, formData.password, formData.fullName);
   };
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+      if (error) throw error;
+
+      // Fetch profile to check admin status
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      if (profile?.is_admin) {
+        toast({ title: 'Welcome, Admin!', description: 'Redirecting to admin dashboard...' });
+        setTimeout(() => {
+          window.location.href = '/admin';
+        }, 800);
+      } else {
+        await supabase.auth.signOut();
+        toast({ title: 'Access Denied', description: 'You are not authorized as an admin.', variant: 'destructive' });
+      }
+    } catch (err: any) {
+      toast({
+        title: 'Admin login failed',
+        description: err?.message || 'Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
 
   const handleResetRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,10 +237,12 @@ const Auth = () => {
                 <div className="text-center text-sm text-muted-foreground">or continue with email</div>
               </div>
               <Tabs defaultValue="signin" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsList className="grid w-full grid-cols-3 mb-6">
                   <TabsTrigger value="signin">Sign In</TabsTrigger>
                   <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                  <TabsTrigger value="admin">Admin</TabsTrigger>
                 </TabsList>
+
 
                 <TabsContent value="signin">
                   <form onSubmit={handleSignIn} className="space-y-4">
@@ -318,6 +356,52 @@ const Auth = () => {
                     </Button>
                   </form>
                 </TabsContent>
+                {/* Admin Login Tab */}
+                <TabsContent value="admin">
+                  <form onSubmit={handleAdminLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="adminEmail" className="text-white">Admin Email</Label>
+                      <Input
+                        id="adminEmail"
+                        name="email"
+                        type="email"
+                        placeholder="admin@example.com"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="adminPassword" className="text-white">Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="adminPassword"
+                          name="password"
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="••••••••"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/50 pr-10"
+                          required
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 text-white/70 hover:text-white"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                    <Button type="submit" className="w-full" variant="secondary">
+                      Admin Login
+                    </Button>
+                  </form>
+                </TabsContent>
+
               </Tabs>
             </CardContent>
           </Card>
