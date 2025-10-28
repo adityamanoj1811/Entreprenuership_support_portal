@@ -4,17 +4,59 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Search, ArrowRight, BookOpen, FileText, Users, TrendingUp, Download, MessageCircle } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import ChatWindow from "@/components/ChatWindow";
+import premiumWorkspace from "@/assets/premium-workspace.jpg";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleAsk = () => {
+    const q = searchQuery.trim();
+    if (!q) return;
+    setChatOpen(true);
+  };
+
+  const handleLogoClick = () => {
+    if (user) navigate("/dashboard");
+    else navigate("/auth");
+  };
 
   const trendingTopics = [
-    { title: "How to register a startup in India?", category: "Legal", responses: 156 },
-    { title: "Setting up ESOP for employees", category: "HR", responses: 89 },
-    { title: "Understanding GST for startups", category: "Finance", responses: 203 },
-    { title: "Raising seed funding", category: "Funding", responses: 134 },
-    { title: "Co-founder equity split", category: "Legal", responses: 78 },
+    { 
+      title: "How to register a startup in India?", 
+      category: "Legal", 
+      responses: 156,
+      url: "https://www.startupindia.gov.in/content/sih/en/startup-scheme/startup-registration.html"
+    },
+    { 
+      title: "Setting up ESOP for employees", 
+      category: "HR", 
+      responses: 89,
+      url: "https://economictimes.indiatimes.com/small-biz/startups/newsbuzz/how-to-set-up-an-esop-plan-for-your-startup/articleshow/72900123.cms"
+    },
+    { 
+      title: "Understanding GST for startups", 
+      category: "Finance", 
+      responses: 203,
+      url: "https://www.gst.gov.in/help/helpmodules/registration"
+    },
+    { 
+      title: "Raising seed funding", 
+      category: "Funding", 
+      responses: 134,
+      url: "https://yourstory.com/2019/02/startup-fundraising-guide-seed-funding"
+    },
+    { 
+      title: "Co-founder equity split", 
+      category: "Legal", 
+      responses: 78,
+      url: "https://inc42.com/resources/startup-equity-distribution-among-co-founders/"
+    },
   ];
 
   const quickActions = [
@@ -57,9 +99,9 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-subtle font-inter">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+    <div className="min-h-screen bg-background bg-vignette font-inter">
+      {/* Header - Minimal premium nav */}
+      <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-primary rounded-xl flex items-center justify-center">
@@ -68,57 +110,59 @@ const Index = () => {
             <span className="text-xl font-poppins font-bold text-foreground">StartupSaathi</span>
           </div>
           
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/courses" className="text-muted-foreground hover:text-foreground transition-colors">
-              Courses
-            </Link>
-            <Link to="/templates" className="text-muted-foreground hover:text-foreground transition-colors">
-              Templates
-            </Link>
-            <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
-              Dashboard
-            </Link>
+          <nav className="hidden md:flex items-center space-x-6">
+            <button onClick={() => setChatOpen(true)} className="text-muted-foreground hover:text-foreground transition-colors">AI Concierge</button>
+            <Link to="/templates" className="text-muted-foreground hover:text-foreground transition-colors">Resources</Link>
           </nav>
           
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">Sign In</Button>
-            <Button variant="default" size="sm">Get Started</Button>
+          <div className="flex items-center">
+            <button
+              onClick={handleLogoClick}
+              aria-label={user ? 'Go to Dashboard' : 'Sign In'}
+              className="w-9 h-9 rounded-full border border-border/60 bg-background/60 hover:bg-background transition-colors flex items-center justify-center"
+            >
+              <span className="text-xs font-bold">S</span>
+            </button>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-poppins font-bold text-foreground mb-6 leading-tight">
+      <section className="relative overflow-hidden py-16 md:py-24">
+        <img src={premiumWorkspace} alt="Premium startup workspace" loading="lazy" className="pointer-events-none select-none absolute inset-0 w-full h-full object-cover opacity-10" />
+        <div className="container relative mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-poppins font-bold text-foreground mb-6 leading-tight tracking-wide animate-fade-in">
             What's confusing you
-            <span className="bg-gradient-primary bg-clip-text text-transparent"> today</span>?
+            <span className="bg-gradient-accent bg-clip-text text-transparent"> today</span>?
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '100ms' }}>
             Ask any startup question and get detailed, step-by-step guidance from experts who understand the Indian ecosystem.
           </p>
-          
-          <div className="max-w-2xl mx-auto mb-12">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-              <Input
-                placeholder="e.g., How do I register my startup in India?"
-                className="pl-12 pr-4 py-6 text-lg bg-background border-2 border-border hover:border-primary focus:border-primary transition-colors shadow-md"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          <div className="max-w-2xl mx-auto mb-12 animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                <Input
+                  placeholder="e.g., How do I register my startup in India?"
+                  className="pl-12 pr-4 py-6 text-lg bg-background/80 border border-accent/20 hover:border-accent/40 focus:border-accent transition-colors shadow-md"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleAsk(); }}
+                />
+              </div>
               <Button 
-                variant="default" 
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10"
+                variant="premium" 
+                className="h-12 px-6"
+                onClick={handleAsk}
               >
-                Ask Now
+                Launch Now
               </Button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
             {quickActions.map((action, index) => (
-              <Link key={index} to={action.href}>
+              <Link key={index} to={action.href} className="animate-fade-in" style={{ animationDelay: `${(index+1)*120}ms` }}>
                 <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-border/50 bg-background/80 backdrop-blur">
                   <CardHeader className="pb-3">
                     <div className={`w-12 h-12 rounded-xl ${action.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300`}>
@@ -152,7 +196,11 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {trendingTopics.map((topic, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-border/50 bg-background cursor-pointer">
+              <Card 
+                key={index} 
+                className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-border/50 bg-background cursor-pointer"
+                onClick={() => window.open(topic.url, '_blank')}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between mb-2">
                     <Badge variant="secondary" className="text-xs">
@@ -230,6 +278,8 @@ const Index = () => {
         </div>
       </section>
 
+      <ChatWindow open={chatOpen} onOpenChange={setChatOpen} initialQuery={searchQuery} />
+
       {/* Footer */}
       <footer className="bg-background border-t border-border py-12">
         <div className="container mx-auto px-4">
@@ -251,7 +301,7 @@ const Index = () => {
               <ul className="space-y-2 text-sm">
                 <li><Link to="/courses" className="text-muted-foreground hover:text-foreground transition-colors">Courses</Link></li>
                 <li><Link to="/templates" className="text-muted-foreground hover:text-foreground transition-colors">Templates</Link></li>
-                <li><Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link></li>
+                
               </ul>
             </div>
             
@@ -267,9 +317,9 @@ const Index = () => {
             <div>
               <h3 className="font-poppins font-semibold text-foreground mb-4">Legal</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</a></li>
+                <li><Link to="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/terms-of-service" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link></li>
+                <li><Link to="/cookie-policy" className="text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</Link></li>
               </ul>
             </div>
           </div>

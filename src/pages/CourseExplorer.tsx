@@ -11,6 +11,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCourses, useCategories } from "@/hooks/useCourses";
 import { useAuth } from "@/contexts/AuthContext";
+import { CreateCourseDialog } from "@/components/CreateCourseDialog";
 
 const CourseExplorer = () => {
   const { user } = useAuth();
@@ -52,7 +53,7 @@ const CourseExplorer = () => {
 
   if (coursesLoading || categoriesLoading) {
     return (
-      <div className="min-h-screen bg-gradient-subtle font-inter">
+      <div className="min-h-screen bg-background bg-vignette font-inter">
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -77,7 +78,7 @@ const CourseExplorer = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle font-inter">
+    <div className="min-h-screen bg-background bg-vignette font-inter">
       <Header />
 
       {/* Page Header */}
@@ -95,6 +96,10 @@ const CourseExplorer = () => {
           
           {/* Search and Filters */}
           <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex-1" />
+              <CreateCourseDialog />
+            </div>
             <div className="flex flex-col md:flex-row gap-4 mb-8">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -150,7 +155,7 @@ const CourseExplorer = () => {
             {courses.map((course) => {
               const progress = getProgressForCourse(course.id);
               const lessonsCount = course.lessons?.length || 0;
-              const duration = Math.ceil((course.duration_minutes || 0) / 60);
+              const duration = course.lessons?.reduce((acc, lesson) => acc + (lesson.duration || 0), 0) || 0;
               
               return (
                 <Link key={course.id} to={`/courses/${course.id}`}>
@@ -188,7 +193,7 @@ const CourseExplorer = () => {
                         <div className="flex items-center space-x-4">
                           <div className="flex items-center">
                             <Clock className="h-4 w-4 mr-1" />
-                            {duration}h
+                            {duration} min
                           </div>
                           <div className="flex items-center">
                             <BookOpen className="h-4 w-4 mr-1" />

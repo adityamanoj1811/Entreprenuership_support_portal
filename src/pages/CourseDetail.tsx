@@ -110,7 +110,7 @@ const CourseDetail = () => {
   
   const currentLessonData = course.lessons?.[currentLesson];
   const instructor = { 
-    display_name: (course.profiles as any)?.display_name || "Instructor", 
+    full_name: (course.profiles as any)?.full_name || "Instructor", 
     avatar_url: (course.profiles as any)?.avatar_url || null, 
     bio: (course.profiles as any)?.bio || "" 
   };
@@ -145,7 +145,7 @@ const CourseDetail = () => {
               <div className="flex items-center gap-6 text-sm text-muted-foreground mb-6">
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-1" />
-                  {Math.ceil((course.duration_minutes || 0) / 60)}h
+                  {course.lessons?.reduce((acc, lesson) => acc + (lesson.duration || 0), 0)} min
                 </div>
                 <div className="flex items-center">
                   <BookOpen className="h-4 w-4 mr-1" />
@@ -295,12 +295,12 @@ const CourseDetail = () => {
                     <div className="flex items-center space-x-4">
                       <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center">
                         <span className="text-primary-foreground font-bold text-lg">
-                          {instructor.display_name?.charAt(0) || 'I'}
+                          {instructor.full_name?.charAt(0) || 'I'}
                         </span>
                       </div>
                       <div>
                         <CardTitle className="font-poppins">
-                          {instructor.display_name || 'Course Instructor'}
+                          {instructor.full_name || 'Course Instructor'}
                         </CardTitle>
                         <CardDescription>
                           Startup Expert & Educator
@@ -324,7 +324,7 @@ const CourseDetail = () => {
               <CardHeader>
                 <CardTitle className="font-poppins">Course Content</CardTitle>
                 <CardDescription>
-                  {course.lessons?.length || 0} lessons • {Math.ceil((course.duration_minutes || 0) / 60)}h
+                  {course.lessons?.length || 0} lessons • {course.lessons?.reduce((acc, lesson) => acc + (lesson.duration || 0), 0)} min
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -354,7 +354,7 @@ const CourseDetail = () => {
                             {lesson.title}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {lesson.duration_minutes ? `${lesson.duration_minutes} min` : 'Content lesson'}
+                            {lesson.duration ? `${lesson.duration} min` : 'Content lesson'}
                           </p>
                         </div>
                       </div>

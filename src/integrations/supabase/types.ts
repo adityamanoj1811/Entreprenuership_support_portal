@@ -7,76 +7,29 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.12 (cd3cf9e)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
-      answers: {
-        Row: {
-          content: string
-          created_at: string
-          id: string
-          is_accepted: boolean | null
-          likes_count: number | null
-          question_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          is_accepted?: boolean | null
-          likes_count?: number | null
-          question_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          is_accepted?: boolean | null
-          likes_count?: number | null
-          question_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "answers_question_id_fkey"
-            columns: ["question_id"]
-            isOneToOne: false
-            referencedRelation: "questions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       categories: {
         Row: {
-          color: string | null
           created_at: string
           description: string | null
-          icon: string | null
           id: string
           name: string
         }
         Insert: {
-          color?: string | null
           created_at?: string
           description?: string | null
-          icon?: string | null
           id?: string
           name: string
         }
         Update: {
-          color?: string | null
           created_at?: string
           description?: string | null
-          icon?: string | null
           id?: string
           name?: string
         }
@@ -86,12 +39,11 @@ export type Database = {
         Row: {
           category_id: string | null
           created_at: string
-          created_by: string | null
+          creator_id: string
           description: string | null
           difficulty: string | null
-          duration_minutes: number | null
           id: string
-          is_published: boolean | null
+          published: boolean
           short_description: string | null
           thumbnail_url: string | null
           title: string
@@ -100,12 +52,11 @@ export type Database = {
         Insert: {
           category_id?: string | null
           created_at?: string
-          created_by?: string | null
+          creator_id: string
           description?: string | null
           difficulty?: string | null
-          duration_minutes?: number | null
           id?: string
-          is_published?: boolean | null
+          published?: boolean
           short_description?: string | null
           thumbnail_url?: string | null
           title: string
@@ -114,12 +65,11 @@ export type Database = {
         Update: {
           category_id?: string | null
           created_at?: string
-          created_by?: string | null
+          creator_id?: string
           description?: string | null
           difficulty?: string | null
-          duration_minutes?: number | null
           id?: string
-          is_published?: boolean | null
+          published?: boolean
           short_description?: string | null
           thumbnail_url?: string | null
           title?: string
@@ -140,10 +90,9 @@ export type Database = {
           content: string | null
           course_id: string
           created_at: string
-          duration_minutes: number | null
+          duration: number | null
           id: string
-          is_published: boolean | null
-          order_index: number
+          order: number
           title: string
           updated_at: string
           video_url: string | null
@@ -152,10 +101,9 @@ export type Database = {
           content?: string | null
           course_id: string
           created_at?: string
-          duration_minutes?: number | null
+          duration?: number | null
           id?: string
-          is_published?: boolean | null
-          order_index: number
+          order: number
           title: string
           updated_at?: string
           video_url?: string | null
@@ -164,10 +112,9 @@ export type Database = {
           content?: string | null
           course_id?: string
           created_at?: string
-          duration_minutes?: number | null
+          duration?: number | null
           id?: string
-          is_published?: boolean | null
-          order_index?: number
+          order?: number
           title?: string
           updated_at?: string
           video_url?: string | null
@@ -186,126 +133,72 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
-          city: string | null
           created_at: string
-          display_name: string | null
-          experience_level: string | null
+          full_name: string | null
           id: string
-          interests: string[] | null
-          role: string | null
-          state: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
-          city?: string | null
           created_at?: string
-          display_name?: string | null
-          experience_level?: string | null
+          full_name?: string | null
           id?: string
-          interests?: string[] | null
-          role?: string | null
-          state?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
-          city?: string | null
           created_at?: string
-          display_name?: string | null
-          experience_level?: string | null
+          full_name?: string | null
           id?: string
-          interests?: string[] | null
-          role?: string | null
-          state?: string | null
           updated_at?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      questions: {
-        Row: {
-          category: string | null
-          content: string
-          created_at: string
-          id: string
-          is_answered: boolean | null
-          likes_count: number | null
-          tags: string[] | null
-          title: string
-          updated_at: string
-          user_id: string
-          views_count: number | null
-        }
-        Insert: {
-          category?: string | null
-          content: string
-          created_at?: string
-          id?: string
-          is_answered?: boolean | null
-          likes_count?: number | null
-          tags?: string[] | null
-          title: string
-          updated_at?: string
-          user_id: string
-          views_count?: number | null
-        }
-        Update: {
-          category?: string | null
-          content?: string
-          created_at?: string
-          id?: string
-          is_answered?: boolean | null
-          likes_count?: number | null
-          tags?: string[] | null
-          title?: string
-          updated_at?: string
-          user_id?: string
-          views_count?: number | null
         }
         Relationships: []
       }
       templates: {
         Row: {
-          category: string | null
+          category: string
           created_at: string
-          created_by: string | null
+          creator_id: string
           description: string | null
-          download_count: number | null
-          file_type: string | null
-          file_url: string | null
+          download_count: number
+          file_type: string
+          file_url: string
           id: string
-          is_premium: boolean | null
+          is_premium: boolean
+          thumbnail_url: string | null
           title: string
           updated_at: string
         }
         Insert: {
-          category?: string | null
+          category: string
           created_at?: string
-          created_by?: string | null
+          creator_id: string
           description?: string | null
-          download_count?: number | null
-          file_type?: string | null
-          file_url?: string | null
+          download_count?: number
+          file_type: string
+          file_url: string
           id?: string
-          is_premium?: boolean | null
+          is_premium?: boolean
+          thumbnail_url?: string | null
           title: string
           updated_at?: string
         }
         Update: {
-          category?: string | null
+          category?: string
           created_at?: string
-          created_by?: string | null
+          creator_id?: string
           description?: string | null
-          download_count?: number | null
-          file_type?: string | null
-          file_url?: string | null
+          download_count?: number
+          file_type?: string
+          file_url?: string
           id?: string
-          is_premium?: boolean | null
+          is_premium?: boolean
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string
         }
@@ -313,54 +206,60 @@ export type Database = {
       }
       user_achievements: {
         Row: {
-          achievement_data: Json | null
           achievement_type: string
+          description: string | null
           earned_at: string
           id: string
+          title: string
           user_id: string
         }
         Insert: {
-          achievement_data?: Json | null
           achievement_type: string
+          description?: string | null
           earned_at?: string
           id?: string
+          title: string
           user_id: string
         }
         Update: {
-          achievement_data?: Json | null
           achievement_type?: string
+          description?: string | null
           earned_at?: string
           id?: string
+          title?: string
           user_id?: string
         }
         Relationships: []
       }
       user_progress: {
         Row: {
-          completed_at: string | null
+          completed: boolean
           course_id: string
           created_at: string
           id: string
-          lesson_id: string | null
-          progress_percentage: number | null
+          lesson_id: string
+          progress_percentage: number
+          updated_at: string
           user_id: string
         }
         Insert: {
-          completed_at?: string | null
+          completed?: boolean
           course_id: string
           created_at?: string
           id?: string
-          lesson_id?: string | null
-          progress_percentage?: number | null
+          lesson_id: string
+          progress_percentage?: number
+          updated_at?: string
           user_id: string
         }
         Update: {
-          completed_at?: string | null
+          completed?: boolean
           course_id?: string
           created_at?: string
           id?: string
-          lesson_id?: string | null
-          progress_percentage?: number | null
+          lesson_id?: string
+          progress_percentage?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -376,6 +275,35 @@ export type Database = {
             columns: ["lesson_id"]
             isOneToOne: false
             referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wishlists: {
+        Row: {
+          created_at: string
+          id: string
+          template_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          template_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          template_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlists_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates"
             referencedColumns: ["id"]
           },
         ]

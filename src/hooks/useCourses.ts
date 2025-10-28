@@ -14,10 +14,10 @@ export const useCourses = (filters?: {
         .from('courses')
         .select(`
           *,
-          categories:category_id(name, color, icon),
-          lessons(id, title, duration_minutes, order_index)
+          categories:category_id(name),
+          lessons(id, title, duration, order)
         `)
-        .eq('is_published', true)
+        .eq('published', true)
         .order('created_at', { ascending: false });
 
       if (filters?.category && filters.category !== 'all') {
@@ -57,17 +57,16 @@ export const useCourse = (courseId: string) => {
         .from('courses')
         .select(`
           *,
-          categories:category_id(name, color, icon),
+          categories:category_id(name),
           lessons(
             id,
             title,
             content,
             video_url,
-            duration_minutes,
-            order_index,
-            is_published
+            duration,
+            order
           ),
-          profiles:created_by(display_name, avatar_url, bio)
+          profiles:creator_id(full_name, avatar_url, bio)
         `)
         .eq('id', courseId)
         .single();
@@ -88,7 +87,7 @@ export const useCourse = (courseId: string) => {
 
       return {
         ...course,
-        lessons: course.lessons?.sort((a, b) => a.order_index - b.order_index) || [],
+        lessons: course.lessons?.sort((a, b) => a.order - b.order) || [],
         userProgress
       };
     },
@@ -119,7 +118,7 @@ export const useUpdateProgress = () => {
           course_id: courseId,
           lesson_id: lessonId,
           progress_percentage: progressPercentage,
-          completed_at: progressPercentage === 100 ? new Date().toISOString() : null
+          completed: progressPercentage === 100
         })
         .select()
         .single();

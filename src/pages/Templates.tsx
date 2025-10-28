@@ -3,18 +3,24 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Download, FileText, Eye, Star } from "lucide-react";
+import { Search, Download, FileText, Eye, Star, Heart } from "lucide-react";
 import { useState } from "react";
 import { useTemplates, useDownloadTemplate } from "@/hooks/useTemplates";
+import { useWishlist } from "@/hooks/useWishlist";
+import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
+import TemplatePreviewModal from "@/components/TemplatePreviewModal";
 
 const Templates = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedAccess, setSelectedAccess] = useState("all");
+  const [previewTemplate, setPreviewTemplate] = useState<any>(null);
   
+  const { user } = useAuth();
   const { data: dbTemplates, isLoading } = useTemplates();
   const downloadTemplate = useDownloadTemplate();
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   const categories = [
     { id: "all", label: "All Categories" },
@@ -60,6 +66,14 @@ const Templates = () => {
 
   const handleDownload = (template: any) => {
     downloadTemplate.mutate(template);
+  };
+
+  const handlePreview = (template: any) => {
+    setPreviewTemplate(template);
+  };
+
+  const handleWishlist = (template: any) => {
+    toggleWishlist(template.id);
   };
 
   if (isLoading) {
@@ -146,13 +160,32 @@ const Templates = () => {
                 </div>
                 
                 <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-2">
                     {getAccessBadge(template.access)}
-                    <div className="flex items-center space-x-1">
-                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                      <span className="text-sm text-muted-foreground">
-                        {template.rating}
-                      </span>
+                    <div className="flex items-center space-x-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleWishlist(template);
+                        }}
+                        className="p-1 h-auto"
+                      >
+                        <Heart 
+                          className={`h-4 w-4 ${
+                            isInWishlist(template.id) 
+                              ? "fill-red-500 text-red-500" 
+                              : "text-muted-foreground hover:text-red-500"
+                          }`} 
+                        />
+                      </Button>
+                      <div className="flex items-center space-x-1">
+                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                        <span className="text-sm text-muted-foreground">
+                          {template.rating}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   
@@ -192,7 +225,12 @@ const Templates = () => {
                   </div>
                   
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handlePreview(template)}
+                    >
                       <Eye className="h-4 w-4 mr-1" />
                       Preview
                     </Button>
@@ -225,6 +263,14 @@ const Templates = () => {
           )}
         </div>
       </section>
+
+      <TemplatePreviewModal
+        template={previewTemplate}
+        isOpen={!!previewTemplate}
+        onClose={() => setPreviewTemplate(null)}
+        onDownload={handleDownload}
+        isDownloading={downloadTemplate.isPending}
+      />
     </div>
   );
 };

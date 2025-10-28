@@ -177,7 +177,7 @@ const Dashboard = () => {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-geist font-bold text-foreground mb-2">
-            Welcome back, {profile?.display_name || authUser?.email?.split('@')[0] || 'Entrepreneur'}!
+            Welcome back, {profile?.full_name || authUser?.email?.split('@')[0] || 'Entrepreneur'}!
           </h1>
           <p className="text-muted-foreground">
             Track your progress and continue your startup journey
