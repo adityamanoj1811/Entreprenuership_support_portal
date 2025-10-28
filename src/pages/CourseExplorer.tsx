@@ -150,7 +150,7 @@ const CourseExplorer = () => {
             {courses.map((course) => {
               const progress = getProgressForCourse(course.id);
               const lessonsCount = course.lessons?.length || 0;
-              const duration = Math.ceil((course.duration_minutes || 0) / 60);
+              const duration = course.lessons?.reduce((acc, lesson) => acc + (lesson.duration || 0), 0) || 0;
               
               return (
                 <Link key={course.id} to={`/courses/${course.id}`}>
@@ -188,7 +188,7 @@ const CourseExplorer = () => {
                         <div className="flex items-center space-x-4">
                           <div className="flex items-center">
                             <Clock className="h-4 w-4 mr-1" />
-                            {duration}h
+                            {duration} min
                           </div>
                           <div className="flex items-center">
                             <BookOpen className="h-4 w-4 mr-1" />
