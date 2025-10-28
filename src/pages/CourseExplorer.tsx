@@ -11,6 +11,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCourses, useCategories } from "@/hooks/useCourses";
 import { useAuth } from "@/contexts/AuthContext";
+import { CreateCourseDialog } from "@/components/CreateCourseDialog";
 
 const CourseExplorer = () => {
   const { user } = useAuth();
@@ -95,6 +96,10 @@ const CourseExplorer = () => {
           
           {/* Search and Filters */}
           <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex-1" />
+              <CreateCourseDialog />
+            </div>
             <div className="flex flex-col md:flex-row gap-4 mb-8">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
