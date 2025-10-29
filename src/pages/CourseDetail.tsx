@@ -61,9 +61,9 @@ const CourseDetail = () => {
 
   const handleVideoProgress = (currentTime: number, duration: number) => {
     if (!user || !course?.lessons?.[currentLesson]) return;
-    
+
     const progressPercentage = Math.floor((currentTime / duration) * 100);
-    
+
     // Auto-mark as complete when 90% watched
     if (progressPercentage >= 90 && !completedLessons.includes(course.lessons[currentLesson].id)) {
       toggleLessonComplete(course.lessons[currentLesson].id);
@@ -104,16 +104,17 @@ const CourseDetail = () => {
     );
   }
 
-  const progress = course.lessons?.length 
-    ? (completedLessons.length / course.lessons.length) * 100 
+  const progress = course.lessons?.length
+    ? (completedLessons.length / course.lessons.length) * 100
     : 0;
-  
+
   const currentLessonData = course.lessons?.[currentLesson];
-  const instructor = { 
-    full_name: (course.profiles as any)?.full_name || "Instructor", 
-    avatar_url: (course.profiles as any)?.avatar_url || null, 
-    bio: (course.profiles as any)?.bio || "" 
+  const instructor = {
+    full_name: "Instructor",
+    avatar_url: null,
+    bio: ""
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-subtle font-inter">
@@ -133,15 +134,15 @@ const CourseDetail = () => {
                   {course.categories?.name || 'General'}
                 </Badge>
               </div>
-              
+
               <h1 className="text-3xl font-poppins font-bold text-foreground mb-4">
                 {course.title}
               </h1>
-              
+
               <p className="text-muted-foreground text-lg leading-relaxed mb-6">
                 {course.description}
               </p>
-              
+
               <div className="flex items-center gap-6 text-sm text-muted-foreground mb-6">
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-1" />
@@ -156,7 +157,7 @@ const CourseDetail = () => {
                   {course.difficulty}
                 </div>
               </div>
-              
+
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-foreground">
@@ -195,7 +196,7 @@ const CourseDetail = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <Button
@@ -241,7 +242,7 @@ const CourseDetail = () => {
                 <TabsTrigger value="resources">Resources</TabsTrigger>
                 <TabsTrigger value="instructor">Instructor</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="overview" className="space-y-4">
                 <Card className="border-border/50 bg-background">
                   <CardHeader>
@@ -269,7 +270,7 @@ const CourseDetail = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
-              
+
               <TabsContent value="resources" className="space-y-4">
                 <Card className="border-border/50 bg-background">
                   <CardHeader>
@@ -288,7 +289,7 @@ const CourseDetail = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
-              
+
               <TabsContent value="instructor" className="space-y-4">
                 <Card className="border-border/50 bg-background">
                   <CardHeader>
@@ -332,11 +333,10 @@ const CourseDetail = () => {
                   {course.lessons?.map((lesson, index) => (
                     <div
                       key={lesson.id}
-                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
-                        index === currentLesson
+                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${index === currentLesson
                           ? "bg-primary/10 border border-primary/20"
                           : "bg-secondary/30 hover:bg-secondary/50"
-                      }`}
+                        }`}
                       onClick={() => setCurrentLesson(index)}
                     >
                       <div className="flex items-center space-x-3">
@@ -360,11 +360,11 @@ const CourseDetail = () => {
                       </div>
                     </div>
                   )) || (
-                    <div className="text-center py-8">
-                      <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">No lessons available</p>
-                    </div>
-                  )}
+                      <div className="text-center py-8">
+                        <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">No lessons available</p>
+                      </div>
+                    )}
                 </div>
               </CardContent>
             </Card>

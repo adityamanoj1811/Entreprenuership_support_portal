@@ -36,9 +36,7 @@ export const VideoPlayer = ({
       onTimeUpdate?.(video.currentTime, video.duration);
     };
 
-    const updateDuration = () => {
-      setDuration(video.duration);
-    };
+    const updateDuration = () => setDuration(video.duration);
 
     const handleEnded = () => {
       setIsPlaying(false);
@@ -59,19 +57,14 @@ export const VideoPlayer = ({
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
-
-    if (isPlaying) {
-      video.pause();
-    } else {
-      video.play();
-    }
+    if (isPlaying) video.pause();
+    else video.play();
     setIsPlaying(!isPlaying);
   };
 
   const handleSeek = (value: number[]) => {
     const video = videoRef.current;
     if (!video) return;
-
     video.currentTime = value[0];
     setCurrentTime(value[0]);
   };
@@ -79,7 +72,6 @@ export const VideoPlayer = ({
   const handleVolumeChange = (value: number[]) => {
     const video = videoRef.current;
     if (!video) return;
-
     const newVolume = value[0];
     video.volume = newVolume;
     setVolume(newVolume);
@@ -89,7 +81,6 @@ export const VideoPlayer = ({
   const toggleMute = () => {
     const video = videoRef.current;
     if (!video) return;
-
     if (isMuted) {
       video.volume = volume;
       setIsMuted(false);
@@ -102,19 +93,14 @@ export const VideoPlayer = ({
   const skip = (seconds: number) => {
     const video = videoRef.current;
     if (!video) return;
-
     video.currentTime = Math.max(0, Math.min(video.currentTime + seconds, duration));
   };
 
   const toggleFullscreen = () => {
     const video = videoRef.current;
     if (!video) return;
-
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      video.requestFullscreen();
-    }
+    if (document.fullscreenElement) document.exitFullscreen();
+    else video.requestFullscreen();
   };
 
   const formatTime = (time: number) => {
@@ -123,6 +109,14 @@ export const VideoPlayer = ({
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  console.log("🎥 Video URL:", videoUrl);
+
+  // ✅ Detect if YouTube link
+  const isYouTube = videoUrl && (videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be"));
+  const embedUrl = isYouTube
+    ? videoUrl.replace("watch?v=", "embed/").replace("youtu.be/", "www.youtube.com/embed/")
+    : videoUrl;
+
   return (
     <div 
       className={cn("relative bg-background rounded-lg overflow-hidden group", className)}
@@ -130,12 +124,24 @@ export const VideoPlayer = ({
       onMouseLeave={() => setShowControls(false)}
     >
       {videoUrl ? (
-        <video
-          ref={videoRef}
-          src={videoUrl}
-          className="w-full aspect-video object-cover"
-          onClick={togglePlay}
-        />
+        isYouTube ? (
+          // 🎬 YouTube embed mode
+          <iframe
+            className="w-full aspect-video rounded-lg"
+            src={embedUrl}
+            title={title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        ) : (
+          // 🎥 Normal video mode
+          <video
+            ref={videoRef}
+            src={videoUrl}
+            className="w-full aspect-video object-cover"
+            onClick={togglePlay}
+          />
+        )
       ) : (
         <div className="w-full aspect-video bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
           <div className="text-center">
@@ -150,13 +156,12 @@ export const VideoPlayer = ({
         </div>
       )}
 
-      {/* Controls Overlay */}
-      {videoUrl && (
+      {/* 🎛️ Controls only shown for regular videos (not YouTube) */}
+      {videoUrl && !isYouTube && (
         <div className={cn(
           "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-200",
           showControls ? "opacity-100" : "opacity-0"
         )}>
-          {/* Progress Bar */}
           <div className="mb-3">
             <Slider
               value={[currentTime]}
@@ -167,46 +172,22 @@ export const VideoPlayer = ({
             />
           </div>
 
-          {/* Controls */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => skip(-10)}
-                className="text-white hover:bg-white/20"
-              >
+              <Button variant="ghost" size="sm" onClick={() => skip(-10)} className="text-white hover:bg-white/20">
                 <SkipBack className="h-4 w-4" />
               </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={togglePlay}
-                className="text-white hover:bg-white/20"
-              >
+              <Button variant="ghost" size="sm" onClick={togglePlay} className="text-white hover:bg-white/20">
                 {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
               </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => skip(10)}
-                className="text-white hover:bg-white/20"
-              >
+              <Button variant="ghost" size="sm" onClick={() => skip(10)} className="text-white hover:bg-white/20">
                 <SkipForward className="h-4 w-4" />
               </Button>
 
               <div className="flex items-center space-x-2 ml-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleMute}
-                  className="text-white hover:bg-white/20"
-                >
+                <Button variant="ghost" size="sm" onClick={toggleMute} className="text-white hover:bg-white/20">
                   {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </Button>
-                
                 <Slider
                   value={[isMuted ? 0 : volume]}
                   max={1}
@@ -221,13 +202,7 @@ export const VideoPlayer = ({
               <span className="text-white text-sm">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleFullscreen}
-                className="text-white hover:bg-white/20"
-              >
+              <Button variant="ghost" size="sm" onClick={toggleFullscreen} className="text-white hover:bg-white/20">
                 <Maximize className="h-4 w-4" />
               </Button>
             </div>

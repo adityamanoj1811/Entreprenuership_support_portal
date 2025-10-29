@@ -65,8 +65,7 @@ export const useCourse = (courseId: string) => {
             video_url,
             duration,
             order
-          ),
-          profiles:creator_id(full_name, avatar_url, bio)
+          )
         `)
         .eq('id', courseId)
         .single();

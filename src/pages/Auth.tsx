@@ -22,6 +22,8 @@ const Auth = () => {
     password: '',
     fullName: '',
   });
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+
   const [forgotOpen, setForgotOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [recoveryMode, setRecoveryMode] = useState(false);
@@ -34,10 +36,26 @@ const Auth = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!error && data) setIsAdmin(data.is_admin);
+    };
+    fetchProfile();
+  }, [user]);
+
   // Redirect if already authenticated
   if (user && !loading) {
-    return <Navigate to="/dashboard" replace />;
+    if (isAdmin === null) return null;
+    return <Navigate to={isAdmin ? "/admin" : "/dashboard"} replace />;
   }
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -59,34 +77,68 @@ const Auth = () => {
     e.preventDefault();
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password,
       });
-      if (error) throw error;
 
-      // Fetch profile to check admin status
+      // Handle authentication errors more precisely
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast({
+            title: "Login Failed",
+            description: "Incorrect email or password. Please check your credentials.",
+            variant: "destructive",
+          });
+        } else if (error.message.toLowerCase().includes("email")) {
+          toast({
+            title: "Invalid Email",
+            description: "The provided email address is not registered.",
+            variant: "destructive",
+          });
+        } else if (error.message.toLowerCase().includes("password")) {
+          toast({
+            title: "Wrong Password",
+            description: "The password you entered is incorrect.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Login Error",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      // If sign-in succeeds, check admin status
       const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', data.user.id)
+        .from("profiles")
+        .select("is_admin")
+        .eq("user_id", data.user.id)
         .single();
 
       if (profileError) throw profileError;
 
       if (profile?.is_admin) {
-        toast({ title: 'Welcome, Admin!', description: 'Redirecting to admin dashboard...' });
+        toast({ title: "Welcome, Admin!", description: "Redirecting to admin dashboard..." });
         setTimeout(() => {
-          window.location.href = '/admin';
+          window.location.href = "/admin";
         }, 800);
       } else {
         await supabase.auth.signOut();
-        toast({ title: 'Access Denied', description: 'You are not authorized as an admin.', variant: 'destructive' });
+        toast({
+          title: "Access Denied",
+          description: "You are not authorized as an admin.",
+          variant: "destructive",
+        });
       }
     } catch (err: any) {
+      console.error("Admin login error:", err);
       toast({
-        title: 'Admin login failed',
-        description: err?.message || 'Please try again.',
-        variant: 'destructive',
+        title: "Login Failed",
+        description: err?.message || "Unexpected error. Please try again.",
+        variant: "destructive",
       });
     }
   };
