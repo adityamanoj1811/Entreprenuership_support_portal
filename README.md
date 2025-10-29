@@ -1,73 +1,104 @@
-# Welcome to your Lovable project
+# 🚀 Entrepreneurship Support Portal
 
-## Project info
+> *“The people who are crazy enough to think they can build the next startup revolution are the ones who actually do.”*
 
-**URL**: https://lovable.dev/projects/00264221-036a-40fc-865f-48e6215f5241
+Welcome to **Entrepreneurship Support Portal**, a next-generation platform built to empower **early-stage founders** with **knowledge, guidance, and tools** to turn ideas into sustainable ventures.
+It’s more than just a web app — it’s a **digital co-founder**, crafted with precision and powered by **AI, modern tech, and community intelligence**.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 🌍 Vision
 
-**Use Lovable**
+Most founders quit before they start — not because they lack ideas, but because they lack direction.
+This platform bridges that gap by combining **AI-powered Q&A**, **modular learning**, and **founder-friendly resources**, giving every entrepreneur a clear roadmap, expert insights, and real execution tools.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/00264221-036a-40fc-865f-48e6215f5241) and start prompting.
+Think of it as **CRED meets Y Combinator’s Startup School**, built for the **Indian ecosystem**.
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## 💡 Core Features
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+| ✨ Module                       | 🧭 Description                                                                                                        |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| 🧠 **Query Resolution Engine** | Ask startup-related doubts in plain language and get AI-curated answers backed by verified data and expert sources.   |
+| 🎓 **Learning Module System**  | Self-paced, modular courses created by founders and experts — designed for action, not theory.                        |
+| 🧰 **Toolkit Library**         | Download business model templates, pitch decks, legal docs, and financial calculators customized for Indian founders. |
+| 📊 **Progress Dashboard**      | Track your entrepreneurial journey with real metrics, goals, and milestone analytics.                                 |
+| 🧑‍💼 **Role-Based Access**    | Supports Entrepreneurs, Course Creators, Mentors, and Admins with personalized privileges and interfaces.             |
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## ⚙️ Tech Stack
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+<div align="center">
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+![React](https://img.shields.io/badge/Frontend-ReactJS-61DAFB?logo=react\&logoColor=white)
+![Supabase](https://img.shields.io/badge/Backend-Supabase-3ECF8E?logo=supabase\&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/UI-TailwindCSS-38B2AC?logo=tailwindcss\&logoColor=white)
+![Vercel](https://img.shields.io/badge/Deployment-Vercel-000000?logo=vercel\&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?logo=postgresql\&logoColor=white)
 
-# Step 3: Install the necessary dependencies.
-npm i
+</div>
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+Clean. Scalable. Modular. Built the way software should be.
+
+---
+
+## 🧩 Architecture Overview
+
+```
+React (Frontend)
+   │
+   ├── Supabase (Auth, Database, Storage)
+   │       ├── Tables for Users, Courses, Queries, Progress
+   │       ├── Row Level Security for Data Protection
+   │
+   └── REST + Realtime API Layer for Seamless Sync
 ```
 
-**Edit a file directly in GitHub**
+Every request and render is optimized for speed and clarity — because founders deserve tools that move as fast as their ideas.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## 🚀 Getting Started
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 🧱 Step 1: Clone the Repository
 
-## What technologies are used for this project?
+```bash
+git clone https://github.com/<your-username>/Entrepreneurship_Support_Portal.git
+cd Entrepreneurship_Support_Portal
+```
 
-This project is built with:
+### ⚙️ Step 2: Install Dependencies
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### 🔑 Step 3: Configure Supabase
 
-## How can I deploy this project?
+Create a project on [Supabase](https://supabase.com/), then add your keys to a `.env` file in the root folder:
 
-Simply open [Lovable](https://lovable.dev/projects/00264221-036a-40fc-865f-48e6215f5241) and click on Share -> Publish.
+```
+REACT_APP_SUPABASE_URL=your_project_url
+REACT_APP_SUPABASE_KEY=your_anon_key
+```
 
-## Can I connect a custom domain to my Lovable project?
+### ▶️ Step 4: Start Development Server
 
-Yes, you can!
+Visit **[http://localhost:3000](http://localhost:3000)** and meet your new co-founder.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🧠 Philosophy
+
+This project isn’t just about code — it’s about conviction.
+It’s about giving **every dreamer** a fighting chance.
+Because entrepreneurship isn’t a privilege, it’s a mindset.
+
+> *“Technology alone is not enough. It’s technology married with the liberal arts and humanities that yields us the results that make our hearts sing.”*
+> — Steve Jobs
+
+---
+
+## 👨‍💻 Contributor
+
+Built with ❤️ by **Aditya** — Engineering Student, Builder, and Dreamer.
+If you’d like to collaborate, fork the repo and open a pull request.
+Great ideas don’t compete — they collaborate.
