@@ -99,6 +99,6 @@ Because entrepreneurship isn’t a privilege, it’s a mindset.
 
 ## 👨‍💻 Contributor
 
-Built with ❤️ by **Aditya** — Engineering Student, Builder, and Dreamer.
+Built with ❤️ by **Aditya and Anish** — Engineering Student, Builder, and Dreamer.
 If you’d like to collaborate, fork the repo and open a pull request.
 Great ideas don’t compete — they collaborate.
